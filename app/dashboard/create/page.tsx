@@ -11,12 +11,19 @@ interface QuestionDraft {
     correctAnswer: string
 }
 
+interface BioDataField {
+    label: string
+    type: string
+    required: boolean
+}
+
 export default function CreateTestPage() {
     const router = useRouter()
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
     const [duration, setDuration] = useState(60)
     const [questions, setQuestions] = useState<QuestionDraft[]>([])
+    const [bioDataFields, setBioDataFields] = useState<BioDataField[]>([])
     const [submitting, setSubmitting] = useState(false)
 
     // Temporary state for new question being added
@@ -48,6 +55,23 @@ export default function CreateTestPage() {
         setQuestions(questions.filter((_, i) => i !== index))
     }
 
+    const addBioDataField = () => {
+        setBioDataFields([...bioDataFields, { label: '', type: 'text', required: true }])
+    }
+
+    const removeBioDataField = (index: number) => {
+        const newFields = [...bioDataFields]
+        newFields.splice(index, 1)
+        setBioDataFields(newFields)
+    }
+
+    const updateBioDataField = (index: number, field: keyof BioDataField, value: any) => {
+        const newFields = [...bioDataFields]
+        // @ts-ignore
+        newFields[index][field] = value
+        setBioDataFields(newFields)
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!title) return alert('Title is required')
@@ -62,16 +86,23 @@ export default function CreateTestPage() {
                     title,
                     description,
                     duration,
-                    questions
+                    questions,
+                    bioDataFields
                 })
             })
 
-            if (!res.ok) throw new Error('Failed to create test')
-
-            router.push('/dashboard')
+            if (res.ok) {
+                router.push('/dashboard')
+                router.refresh()
+            } else {
+                const msg = await res.text()
+                console.error(`Failed to create test: ${msg}`)
+                alert(`Failed to create test. Check console for details.`)
+                setSubmitting(false)
+            }
         } catch (error) {
             console.error(error)
-            alert('Failed to create test')
+            alert('Failed to create test. Check console for details.')
             setSubmitting(false)
         }
     }
@@ -138,6 +169,68 @@ export default function CreateTestPage() {
                                     />
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Bio Data Configuration */}
+                    <div className="bg-white shadow sm:rounded-lg p-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-medium leading-6 text-gray-900">Student Information Collection</h3>
+                            <button
+                                type="button"
+                                onClick={addBioDataField}
+                                className="text-sm text-indigo-600 hover:text-indigo-900 font-medium"
+                            >
+                                + Add Field
+                            </button>
+                        </div>
+                        <p className="text-sm text-gray-500 mb-4">Define fields that students must fill out before starting the test (e.g., Student ID, Department).</p>
+
+                        <div className="space-y-4">
+                            {bioDataFields.map((field, index) => (
+                                <div key={index} className="flex items-start space-x-4 bg-gray-50 p-4 rounded-md">
+                                    <div className="flex-1 space-y-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Field Label (e.g. Student ID)"
+                                            value={field.label}
+                                            onChange={(e) => updateBioDataField(index, 'label', e.target.value)}
+                                            required
+                                            className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                        />
+                                        <div className="flex space-x-4">
+                                            <select
+                                                value={field.type}
+                                                onChange={(e) => updateBioDataField(index, 'type', e.target.value)}
+                                                className="block w-1/2 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                            >
+                                                <option value="text">Text</option>
+                                                <option value="number">Number</option>
+                                                <option value="email">Email</option>
+                                            </select>
+                                            <label className="flex items-center space-x-2">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={field.required}
+                                                    onChange={(e) => updateBioDataField(index, 'required', e.target.checked)}
+                                                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                                />
+                                                <span className="text-sm text-gray-700">Required</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => removeBioDataField(index)}
+                                        className="text-red-600 hover:text-red-900"
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
+                            ))}
+                            {bioDataFields.length === 0 && (
+                                <p className="text-sm text-gray-400 italic">No custom fields added.</p>
+                            )}
                         </div>
                     </div>
 
@@ -281,7 +374,7 @@ export default function CreateTestPage() {
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
+            </div >
+        </div >
     )
 }

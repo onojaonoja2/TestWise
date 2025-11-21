@@ -16,10 +16,10 @@ export async function POST(req: Request) {
 
     try {
         const body = await req.json()
-        const { title, description, duration, questions } = body
+        const { title, description, duration, questions, bioDataFields } = body
 
-        if (!title || !questions || !Array.isArray(questions)) {
-            return new NextResponse("Invalid data", { status: 400 })
+        if (!title || !questions || questions.length === 0) {
+            return new NextResponse("Title and at least one question are required", { status: 400 })
         }
 
         const test = await prisma.test.create({
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
                 description,
                 duration: parseInt(duration),
                 creatorId: session.user.id,
-                published: true, // Auto-publish for simplicity in this MVP
+                bioDataFields: bioDataFields, // Save bio-data configuration
                 questions: {
                     create: questions.map((q: any) => ({
                         text: q.text,
@@ -44,6 +44,6 @@ export async function POST(req: Request) {
         return NextResponse.json(test)
     } catch (error) {
         console.error("[TEST_CREATE]", error)
-        return new NextResponse("Internal Error", { status: 500 })
+        return new NextResponse(error instanceof Error ? error.message : "Internal Error", { status: 500 })
     }
 }

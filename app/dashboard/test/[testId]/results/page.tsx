@@ -61,6 +61,9 @@ export default async function TestResultsPage({ params }: { params: Promise<{ te
                                     Student
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                                    Bio Data
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                                     Score
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
@@ -91,6 +94,19 @@ export default async function TestResultsPage({ params }: { params: Promise<{ te
                                                 <div className="text-sm text-gray-500">{submission.student.email}</div>
                                             </div>
                                         </div>
+                                    </td>
+                                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                                        {submission.bioData ? (
+                                            <div className="flex flex-col">
+                                                {Object.entries(submission.bioData as Record<string, any>).map(([key, value]) => (
+                                                    <span key={key} className="text-xs">
+                                                        <span className="font-semibold">{key}:</span> {value}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <span className="text-gray-400 italic">N/A</span>
+                                        )}
                                     </td>
                                     <td className="whitespace-nowrap px-6 py-4">
                                         <div className="text-sm text-gray-900 font-semibold">{submission.score}</div>

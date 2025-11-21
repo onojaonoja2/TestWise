@@ -37,8 +37,9 @@ model Test {
   description String?
   duration    Int       // Duration in minutes
   published   Boolean   @default(false)
-  archived    Boolean   @default(false)
-  creatorId   String
+  archived      Boolean   @default(false)
+  bioDataFields Json?     // Stores the configuration of fields to collect
+  creatorId     String
   creator     User      @relation("CreatedTests", fields: [creatorId], references: [id])
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -81,12 +82,12 @@ model Submission {
   
   // Monitoring fields
   status          SubmissionStatus @default(STARTED)
+  bioData         Json?            // Stores the actual data submitted by the student
   currentWarnings Int              @default(0)
   lastHeartbeat   DateTime         @default(now())
 
   answers     Answer[]
 }
-
 enum SubmissionStatus {
   STARTED
   COMPLETED

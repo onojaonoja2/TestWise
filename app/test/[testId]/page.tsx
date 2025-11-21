@@ -11,12 +11,19 @@ interface Question {
     points: number
 }
 
+interface BioDataField {
+    label: string
+    type: string
+    required: boolean
+}
+
 interface Test {
     id: string
     title: string
     description: string
     duration: number
     questions: Question[]
+    bioDataFields?: BioDataField[]
 }
 
 export default function TestPage({ params }: { params: Promise<{ testId: string }> }) {
@@ -28,6 +35,10 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
     const [submitting, setSubmitting] = useState(false)
     const [warnings, setWarnings] = useState(0)
 
+    // Bio Data State
+    const [bioData, setBioData] = useState<Record<string, string>>({})
+    const [bioDataSubmitted, setBioDataSubmitted] = useState(false)
+
     useEffect(() => {
         const fetchTest = async () => {
             try {
@@ -35,6 +46,11 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
                 if (!res.ok) throw new Error('Failed to fetch test')
                 const data = await res.json()
                 setTest(data)
+
+                // If no bio data fields, mark as submitted
+                if (!data.bioDataFields || data.bioDataFields.length === 0) {
+                    setBioDataSubmitted(true)
+                }
             } catch (error) {
                 console.error(error)
                 alert('Error loading test')
@@ -47,7 +63,7 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
 
     // Security: Fullscreen & Focus Tracking
     useEffect(() => {
-        if (loading || !test) return
+        if (loading || !test || !bioDataSubmitted) return
 
         const enterFullscreen = async () => {
             try {
@@ -96,6 +112,9 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
         document.addEventListener('paste', preventCopyPaste)
         document.addEventListener('click', enforceFullscreen)
 
+        // Initial fullscreen attempt
+        enterFullscreen()
+
         return () => {
             clearInterval(heartbeatInterval)
             document.removeEventListener('visibilitychange', handleVisibilityChange)
@@ -107,7 +126,36 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
                 document.exitFullscreen().catch(() => { })
             }
         }
-    }, [loading, test, testId, warnings])
+    }, [loading, test, testId, warnings, bioDataSubmitted])
+
+    const handleBioDataSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+
+        if (test?.bioDataFields) {
+            for (const field of test.bioDataFields) {
+                if (field.required && !bioData[field.label]) {
+                    alert(`${field.label} is required`)
+                    return
+                }
+            }
+        }
+
+        try {
+            // Start the test session on the server
+            const res = await fetch(`/api/tests/${testId}/start`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bioData })
+            })
+
+            if (!res.ok) throw new Error("Failed to start test")
+
+            setBioDataSubmitted(true)
+        } catch (error) {
+            console.error("Failed to start test", error)
+            alert("Failed to start test. Please try again.")
+        }
+    }
 
     const handleAnswerChange = (questionId: string, value: string) => {
         setAnswers(prev => ({ ...prev, [questionId]: value }))
@@ -136,6 +184,55 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
 
     if (loading) return <div className="p-8 text-center">Loading test...</div>
     if (!test) return <div className="p-8 text-center">Test not found</div>
+
+    // Bio Data Form
+    if (!bioDataSubmitted) {
+        return (
+            <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+                <div className="sm:mx-auto sm:w-full sm:max-w-md">
+                    <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+                        {test.title}
+                    </h2>
+                    <p className="mt-2 text-center text-sm text-gray-600">
+                        Please provide your information to start the test.
+                    </p>
+                </div>
+
+                <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+                    <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                        <form className="space-y-6" onSubmit={handleBioDataSubmit}>
+                            {test.bioDataFields?.map((field, index) => (
+                                <div key={index}>
+                                    <label htmlFor={`field-${index}`} className="block text-sm font-medium text-gray-700">
+                                        {field.label} {field.required && <span className="text-red-500">*</span>}
+                                    </label>
+                                    <div className="mt-1">
+                                        <input
+                                            id={`field-${index}`}
+                                            type={field.type === 'number' ? 'number' : field.type === 'email' ? 'email' : 'text'}
+                                            required={field.required}
+                                            value={bioData[field.label] || ''}
+                                            onChange={(e) => setBioData({ ...bioData, [field.label]: e.target.value })}
+                                            className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+
+                            <div>
+                                <button
+                                    type="submit"
+                                    className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                >
+                                    Start Test
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 select-none">

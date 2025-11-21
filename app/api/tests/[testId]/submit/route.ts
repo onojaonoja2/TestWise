@@ -36,11 +36,10 @@ export async function POST(
             // Calculate score
             if (answers && typeof answers === 'object') {
                 for (const [questionId, value] of Object.entries(answers)) {
-                    const question = test.questions.find(q => q.id === questionId)
+                    const question = test.questions.find((q: any) => q.id === questionId)
                     if (question) {
                         let isCorrect = false
                         // Simple string comparison for now. 
-                        // TODO: Improve for case-insensitivity or fuzzy matching if needed.
                         if (String(value).trim().toLowerCase() === question.correctAnswer.trim().toLowerCase()) {
                             isCorrect = true
                             totalScore += question.points
@@ -54,19 +53,45 @@ export async function POST(
                 }
             }
 
-            // Create the submission record
-            const newSubmission = await tx.submission.create({
-                data: {
+            // Find existing STARTED submission
+            const existingSubmission = await tx.submission.findFirst({
+                where: {
                     testId: testId,
                     studentId: session.user.id,
-                    endTime: new Date(),
-                    graded: true,
-                    score: totalScore,
-                    status: 'COMPLETED',
-                    currentWarnings: warnings || 0,
-                    lastHeartbeat: new Date()
+                    status: 'STARTED'
                 }
             })
+
+            let newSubmission
+
+            if (existingSubmission) {
+                // Update existing submission
+                newSubmission = await tx.submission.update({
+                    where: { id: existingSubmission.id },
+                    data: {
+                        status: 'COMPLETED',
+                        endTime: new Date(),
+                        score: totalScore,
+                        graded: true,
+                        currentWarnings: warnings || 0,
+                        lastHeartbeat: new Date()
+                    }
+                })
+            } else {
+                // Create new submission if none existed
+                newSubmission = await tx.submission.create({
+                    data: {
+                        testId: testId,
+                        studentId: session.user.id,
+                        endTime: new Date(),
+                        graded: true,
+                        score: totalScore,
+                        status: 'COMPLETED',
+                        currentWarnings: warnings || 0,
+                        lastHeartbeat: new Date()
+                    }
+                })
+            }
 
             // Create answer records
             for (const ans of gradedAnswers) {
