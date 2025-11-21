@@ -37,6 +37,19 @@ export default async function Dashboard() {
         }
     })
 
+    const completedSubmissions = await prisma.submission.findMany({
+        where: {
+            studentId: session.user.id,
+            status: 'COMPLETED'
+        },
+        include: {
+            test: true
+        },
+        orderBy: {
+            endTime: 'desc'
+        }
+    })
+
     return (
         <div className="min-h-screen bg-gray-100">
             <nav className="bg-white shadow">
@@ -85,7 +98,7 @@ export default async function Dashboard() {
                                     {userTests.length === 0 ? (
                                         <li className="px-4 py-4 sm:px-6 text-gray-500">You haven't created any tests yet.</li>
                                     ) : (
-                                        userTests.map((test) => (
+                                        userTests.map((test: any) => (
                                             <li key={test.id}>
                                                 <div className="block hover:bg-gray-50">
                                                     <div className="px-4 py-4 sm:px-6">
@@ -104,9 +117,24 @@ export default async function Dashboard() {
                                                                 </p>
                                                             </div>
                                                             <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                                                                <p>
+                                                                <p className="mr-4">
                                                                     {test._count.submissions} submissions
                                                                 </p>
+                                                                <div className="flex space-x-2">
+                                                                    <Link
+                                                                        href={`/dashboard/test/${test.id}/monitor`}
+                                                                        className="text-indigo-600 hover:text-indigo-900 font-medium"
+                                                                    >
+                                                                        Monitor
+                                                                    </Link>
+                                                                    <span className="text-gray-300">|</span>
+                                                                    <Link
+                                                                        href={`/dashboard/test/${test.id}/results`}
+                                                                        className="text-indigo-600 hover:text-indigo-900 font-medium"
+                                                                    >
+                                                                        Results
+                                                                    </Link>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -120,13 +148,13 @@ export default async function Dashboard() {
                     )}
 
                     {/* Student Section: Available Tests */}
-                    <div>
+                    <div className="mb-12">
                         <h2 className="text-xl font-semibold text-gray-900 mb-4">Available Tests</h2>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             {availableTests.length === 0 ? (
                                 <p className="text-gray-500 col-span-full">No tests available at the moment.</p>
                             ) : (
-                                availableTests.map((test) => (
+                                availableTests.map((test: any) => (
                                     <div key={test.id} className="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
                                         <div className="min-w-0 flex-1">
                                             <Link href={`/test/${test.id}`} className="focus:outline-none">
@@ -141,6 +169,40 @@ export default async function Dashboard() {
                             )}
                         </div>
                     </div>
+
+                    {/* Student Section: Completed Tests */}
+                    {completedSubmissions.length > 0 && (
+                        <div>
+                            <h2 className="text-xl font-semibold text-gray-900 mb-4">My Results</h2>
+                            <div className="overflow-hidden bg-white shadow sm:rounded-md">
+                                <ul role="list" className="divide-y divide-gray-200">
+                                    {completedSubmissions.map((submission: any) => (
+                                        <li key={submission.id}>
+                                            <Link href={`/dashboard/results/${submission.id}`} className="block hover:bg-gray-50">
+                                                <div className="px-4 py-4 sm:px-6">
+                                                    <div className="flex items-center justify-between">
+                                                        <p className="truncate text-sm font-medium text-indigo-600">{submission.test.title}</p>
+                                                        <div className="ml-2 flex flex-shrink-0">
+                                                            <p className="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">
+                                                                Score: {submission.score}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="mt-2 sm:flex sm:justify-between">
+                                                        <div className="sm:flex">
+                                                            <p className="flex items-center text-sm text-gray-500">
+                                                                Submitted on {new Date(submission.endTime || '').toLocaleDateString()}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    )}
 
                 </div>
             </main>

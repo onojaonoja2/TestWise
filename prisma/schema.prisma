@@ -78,7 +78,17 @@ model Submission {
   score       Int?
   graded      Boolean   @default(false)
   
+  // Monitoring fields
+  status          SubmissionStatus @default(STARTED)
+  currentWarnings Int              @default(0)
+  lastHeartbeat   DateTime         @default(now())
+
   answers     Answer[]
+}
+
+enum SubmissionStatus {
+  STARTED
+  COMPLETED
 }
 
 model Answer {

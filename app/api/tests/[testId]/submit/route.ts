@@ -16,32 +16,68 @@ export async function POST(
 
     try {
         const body = await req.json()
-        const { answers } = body // { questionId: answerValue }
+        const { answers, warnings } = body // { questionId: answerValue }
+
+        // Fetch test with questions and correct answers for grading
+        const test = await prisma.test.findUnique({
+            where: { id: testId },
+            include: { questions: true }
+        })
+
+        if (!test) {
+            return new NextResponse("Test not found", { status: 404 })
+        }
 
         // Start a transaction to ensure data integrity
         const submission = await prisma.$transaction(async (tx: any) => {
+            let totalScore = 0
+            const gradedAnswers = []
+
+            // Calculate score
+            if (answers && typeof answers === 'object') {
+                for (const [questionId, value] of Object.entries(answers)) {
+                    const question = test.questions.find(q => q.id === questionId)
+                    if (question) {
+                        let isCorrect = false
+                        // Simple string comparison for now. 
+                        // TODO: Improve for case-insensitivity or fuzzy matching if needed.
+                        if (String(value).trim().toLowerCase() === question.correctAnswer.trim().toLowerCase()) {
+                            isCorrect = true
+                            totalScore += question.points
+                        }
+                        gradedAnswers.push({
+                            questionId,
+                            value: String(value),
+                            isCorrect
+                        })
+                    }
+                }
+            }
+
             // Create the submission record
             const newSubmission = await tx.submission.create({
                 data: {
                     testId: testId,
                     studentId: session.user.id,
                     endTime: new Date(),
-                    graded: false, // Auto-grading logic to be added later
+                    graded: true,
+                    score: totalScore,
+                    status: 'COMPLETED',
+                    currentWarnings: warnings || 0,
+                    lastHeartbeat: new Date()
                 }
             })
 
             // Create answer records
-            if (answers && typeof answers === 'object') {
-                const answerPromises = Object.entries(answers).map(([questionId, value]) => {
-                    return tx.answer.create({
-                        data: {
-                            submissionId: newSubmission.id,
-                            questionId,
-                            value: String(value),
-                        }
-                    })
+            for (const ans of gradedAnswers) {
+                await tx.answer.create({
+                    data: {
+                        submissionId: newSubmission.id,
+                        questionId: ans.questionId,
+                        value: ans.value,
+                        isCorrect: ans.isCorrect
+                    }
                 })
-                await Promise.all(answerPromises)
             }
 
             return newSubmission

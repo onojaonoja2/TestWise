@@ -81,6 +81,15 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
             }
         }
 
+        // Heartbeat interval
+        const heartbeatInterval = setInterval(() => {
+            fetch(`/api/tests/${testId}/heartbeat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ warnings })
+            }).catch(console.error)
+        }, 5000) // Send heartbeat every 5 seconds
+
         document.addEventListener('visibilitychange', handleVisibilityChange)
         document.addEventListener('contextmenu', preventCopyPaste)
         document.addEventListener('copy', preventCopyPaste)
@@ -88,6 +97,7 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
         document.addEventListener('click', enforceFullscreen)
 
         return () => {
+            clearInterval(heartbeatInterval)
             document.removeEventListener('visibilitychange', handleVisibilityChange)
             document.removeEventListener('contextmenu', preventCopyPaste)
             document.removeEventListener('copy', preventCopyPaste)
@@ -97,7 +107,7 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
                 document.exitFullscreen().catch(() => { })
             }
         }
-    }, [loading, test])
+    }, [loading, test, testId, warnings])
 
     const handleAnswerChange = (questionId: string, value: string) => {
         setAnswers(prev => ({ ...prev, [questionId]: value }))
