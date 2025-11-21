@@ -48,3 +48,45 @@ export async function GET(
         return new NextResponse("Internal Error", { status: 500 })
     }
 }
+
+export async function PATCH(
+    req: Request,
+    { params }: { params: Promise<{ testId: string }> }
+) {
+    const session = await getServerSession(authOptions)
+    const { testId } = await params
+
+    if (!session || (session.user.role !== 'TEACHER' && session.user.role !== 'ADMIN')) {
+        return new NextResponse("Unauthorized", { status: 401 })
+    }
+
+    try {
+        const body = await req.json()
+        const { published, archived } = body
+
+        const test = await prisma.test.findUnique({
+            where: { id: testId }
+        })
+
+        if (!test) {
+            return new NextResponse("Test not found", { status: 404 })
+        }
+
+        if (test.creatorId !== session.user.id && session.user.role !== 'ADMIN') {
+            return new NextResponse("Unauthorized", { status: 401 })
+        }
+
+        const updatedTest = await prisma.test.update({
+            where: { id: testId },
+            data: {
+                published: published !== undefined ? published : test.published,
+                archived: archived !== undefined ? archived : test.archived
+            }
+        })
+
+        return NextResponse.json(updatedTest)
+    } catch (error) {
+        console.error("[TEST_PATCH]", error)
+        return new NextResponse("Internal Error", { status: 500 })
+    }
+}

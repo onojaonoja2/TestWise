@@ -37,6 +37,7 @@ model Test {
   description String?
   duration    Int       // Duration in minutes
   published   Boolean   @default(false)
+  archived    Boolean   @default(false)
   creatorId   String
   creator     User      @relation("CreatedTests", fields: [creatorId], references: [id])
   createdAt   DateTime  @default(now())

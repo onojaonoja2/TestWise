@@ -3,17 +3,22 @@ import { authOptions } from "../api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { redirect } from "next/navigation"
+import TestManagementButtons from "./components/TestManagementButtons"
 
-export default async function Dashboard() {
+export default async function Dashboard({ searchParams }: { searchParams: Promise<{ view?: string }> }) {
     const session = await getServerSession(authOptions)
+    const { view } = await searchParams
 
     if (!session) {
         redirect("/auth/signin")
     }
 
+    const showArchived = view === 'archived'
+
     const userTests = await prisma.test.findMany({
         where: {
-            creatorId: session.user.id
+            creatorId: session.user.id,
+            archived: showArchived
         },
         orderBy: {
             createdAt: 'desc'
@@ -28,6 +33,7 @@ export default async function Dashboard() {
     const availableTests = await prisma.test.findMany({
         where: {
             published: true,
+            archived: false, // Never show archived tests to students
             NOT: {
                 creatorId: session.user.id // Don't show own tests in "Available" list
             }
@@ -80,23 +86,35 @@ export default async function Dashboard() {
                     <div className="mb-8 flex justify-between items-center">
                         <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900">Dashboard</h1>
                         {(session.user.role === 'TEACHER' || session.user.role === 'ADMIN') && (
-                            <Link
-                                href="/dashboard/create"
-                                className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                            >
-                                Create New Test
-                            </Link>
+                            <div className="flex space-x-4">
+                                <Link
+                                    href={showArchived ? "/dashboard" : "/dashboard?view=archived"}
+                                    className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                                >
+                                    {showArchived ? "View Active Tests" : "View Archived Tests"}
+                                </Link>
+                                <Link
+                                    href="/dashboard/create"
+                                    className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                >
+                                    Create New Test
+                                </Link>
+                            </div>
                         )}
                     </div>
 
                     {/* Teacher Section: My Created Tests */}
                     {(session.user.role === 'TEACHER' || session.user.role === 'ADMIN') && (
                         <div className="mb-12">
-                            <h2 className="text-xl font-semibold text-gray-900 mb-4">My Created Tests</h2>
+                            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                                {showArchived ? "My Archived Tests" : "My Created Tests"}
+                            </h2>
                             <div className="overflow-hidden bg-white shadow sm:rounded-md">
                                 <ul role="list" className="divide-y divide-gray-200">
                                     {userTests.length === 0 ? (
-                                        <li className="px-4 py-4 sm:px-6 text-gray-500">You haven't created any tests yet.</li>
+                                        <li className="px-4 py-4 sm:px-6 text-gray-500">
+                                            {showArchived ? "No archived tests found." : "You haven't created any tests yet."}
+                                        </li>
                                     ) : (
                                         userTests.map((test: any) => (
                                             <li key={test.id}>
@@ -104,10 +122,15 @@ export default async function Dashboard() {
                                                     <div className="px-4 py-4 sm:px-6">
                                                         <div className="flex items-center justify-between">
                                                             <p className="truncate text-sm font-medium text-indigo-600">{test.title}</p>
-                                                            <div className="ml-2 flex flex-shrink-0">
+                                                            <div className="ml-2 flex flex-shrink-0 space-x-2">
                                                                 <p className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${test.published ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                                                                     {test.published ? 'Published' : 'Draft'}
                                                                 </p>
+                                                                {test.archived && (
+                                                                    <p className="inline-flex rounded-full bg-gray-100 px-2 text-xs font-semibold leading-5 text-gray-800">
+                                                                        Archived
+                                                                    </p>
+                                                                )}
                                                             </div>
                                                         </div>
                                                         <div className="mt-2 sm:flex sm:justify-between">
@@ -120,7 +143,7 @@ export default async function Dashboard() {
                                                                 <p className="mr-4">
                                                                     {test._count.submissions} submissions
                                                                 </p>
-                                                                <div className="flex space-x-2">
+                                                                <div className="flex space-x-2 items-center">
                                                                     <Link
                                                                         href={`/dashboard/test/${test.id}/monitor`}
                                                                         className="text-indigo-600 hover:text-indigo-900 font-medium"
@@ -134,6 +157,12 @@ export default async function Dashboard() {
                                                                     >
                                                                         Results
                                                                     </Link>
+                                                                    <span className="text-gray-300">|</span>
+                                                                    <TestManagementButtons
+                                                                        testId={test.id}
+                                                                        published={test.published}
+                                                                        archived={test.archived}
+                                                                    />
                                                                 </div>
                                                             </div>
                                                         </div>
