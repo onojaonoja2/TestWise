@@ -74,6 +74,14 @@ export default function AdminDashboard() {
                             Organization Management
                         </h2>
                     </div>
+                    <div className="mt-4 flex md:ml-4 md:mt-0">
+                        <Link
+                            href="/api/auth/signout"
+                            className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                        >
+                            Sign out
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Create Organization Form */}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Plus, User as UserIcon, Edit2, X, Check } from 'lucide-react'
 
 interface User {
@@ -119,6 +120,14 @@ export default function OrganizationManagementPage() {
                         <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
                             Manage Organization
                         </h2>
+                    </div>
+                    <div className="mt-4 flex md:ml-4 md:mt-0">
+                        <Link
+                            href="/api/auth/signout"
+                            className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                        >
+                            Sign out
+                        </Link>
                     </div>
                 </div>
 

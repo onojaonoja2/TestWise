@@ -13,6 +13,11 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         redirect("/auth/signin")
     }
 
+    // Redirect Global Admins to Admin Dashboard
+    if (session.user.role === 'ADMIN') {
+        redirect("/dashboard/admin")
+    }
+
     const showArchived = view === 'archived'
 
     const userTests = await prisma.test.findMany({
