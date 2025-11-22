@@ -41,7 +41,24 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
             archived: false, // Never show archived tests to students
             NOT: {
                 creatorId: session.user.id // Don't show own tests in "Available" list
-            }
+            },
+            OR: [
+                { visibility: 'PUBLIC' },
+                {
+                    visibility: 'ORGANIZATION',
+                    creator: {
+                        organizationId: session.user.organizationId
+                    }
+                },
+                {
+                    visibility: 'WHITELIST',
+                    allowedUsers: {
+                        some: {
+                            email: session.user.email
+                        }
+                    }
+                }
+            ]
         },
         orderBy: {
             createdAt: 'desc'
@@ -144,9 +161,19 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                                                                         Archived
                                                                     </p>
                                                                 )}
-                                                                {test.isPublic && (
+                                                                {test.visibility === 'PUBLIC' && (
                                                                     <p className="inline-flex rounded-full bg-blue-100 px-2 text-xs font-semibold leading-5 text-blue-800">
                                                                         Public
+                                                                    </p>
+                                                                )}
+                                                                {test.visibility === 'ORGANIZATION' && (
+                                                                    <p className="inline-flex rounded-full bg-purple-100 px-2 text-xs font-semibold leading-5 text-purple-800">
+                                                                        Org Only
+                                                                    </p>
+                                                                )}
+                                                                {test.visibility === 'WHITELIST' && (
+                                                                    <p className="inline-flex rounded-full bg-orange-100 px-2 text-xs font-semibold leading-5 text-orange-800">
+                                                                        Whitelist
                                                                     </p>
                                                                 )}
                                                             </div>
@@ -180,7 +207,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                                                                         testId={test.id}
                                                                         published={test.published}
                                                                         archived={test.archived}
-                                                                        isPublic={test.isPublic}
+                                                                        visibility={test.visibility}
                                                                     />
                                                                 </div>
                                                             </div>

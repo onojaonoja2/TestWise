@@ -7,10 +7,10 @@ interface TestManagementButtonsProps {
     testId: string
     published: boolean
     archived: boolean
-    isPublic?: boolean
+    visibility: string
 }
 
-export default function TestManagementButtons({ testId, published, archived, isPublic }: TestManagementButtonsProps) {
+export default function TestManagementButtons({ testId, published, archived, visibility }: TestManagementButtonsProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
 
@@ -48,7 +48,7 @@ export default function TestManagementButtons({ testId, published, archived, isP
 
     return (
         <div className="flex space-x-2 text-sm items-center">
-            {isPublic && (
+            {visibility === 'PUBLIC' && (
                 <>
                     <button
                         onClick={copyLink}

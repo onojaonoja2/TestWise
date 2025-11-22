@@ -22,7 +22,8 @@ export default function CreateTestPage() {
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
     const [duration, setDuration] = useState(60)
-    const [isPublic, setIsPublic] = useState(false)
+    const [visibility, setVisibility] = useState('ORGANIZATION')
+    const [allowedEmails, setAllowedEmails] = useState('')
     const [questions, setQuestions] = useState<QuestionDraft[]>([])
     const [bioDataFields, setBioDataFields] = useState<BioDataField[]>([])
     const [submitting, setSubmitting] = useState(false)
@@ -80,6 +81,8 @@ export default function CreateTestPage() {
 
         setSubmitting(true)
         try {
+            const emailList = visibility === 'WHITELIST' ? allowedEmails.split(',').map(e => e.trim()).filter(e => e) : []
+
             const res = await fetch('/api/tests', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -87,7 +90,8 @@ export default function CreateTestPage() {
                     title,
                     description,
                     duration,
-                    isPublic,
+                    visibility,
+                    allowedEmails: emailList,
                     questions,
                     bioDataFields
                 })
@@ -173,25 +177,47 @@ export default function CreateTestPage() {
                             </div>
 
                             <div className="col-span-full">
-                                <div className="relative flex gap-x-3">
-                                    <div className="flex h-6 items-center">
-                                        <input
-                                            id="isPublic"
-                                            name="isPublic"
-                                            type="checkbox"
-                                            checked={isPublic}
-                                            onChange={(e) => setIsPublic(e.target.checked)}
-                                            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                                <label htmlFor="visibility" className="block text-sm font-medium leading-6 text-gray-900">
+                                    Test Visibility
+                                </label>
+                                <div className="mt-2">
+                                    <select
+                                        id="visibility"
+                                        name="visibility"
+                                        value={visibility}
+                                        onChange={(e) => setVisibility(e.target.value)}
+                                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                    >
+                                        <option value="ORGANIZATION">Organization Only (My Org)</option>
+                                        <option value="PUBLIC">Public (Anyone with link)</option>
+                                        <option value="WHITELIST">Specific People (Whitelist)</option>
+                                    </select>
+                                </div>
+                                <p className="mt-1 text-sm text-gray-500">
+                                    {visibility === 'ORGANIZATION' && "Only users in your organization can see and take this test."}
+                                    {visibility === 'PUBLIC' && "Anyone with the link can take this test (Guest access allowed)."}
+                                    {visibility === 'WHITELIST' && "Only users with the specified emails can take this test."}
+                                </p>
+                            </div>
+
+                            {visibility === 'WHITELIST' && (
+                                <div className="col-span-full">
+                                    <label htmlFor="allowedEmails" className="block text-sm font-medium leading-6 text-gray-900">
+                                        Allowed Emails (comma separated)
+                                    </label>
+                                    <div className="mt-2">
+                                        <textarea
+                                            id="allowedEmails"
+                                            name="allowedEmails"
+                                            rows={3}
+                                            value={allowedEmails}
+                                            onChange={(e) => setAllowedEmails(e.target.value)}
+                                            placeholder="student1@example.com, student2@example.com"
+                                            className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                         />
                                     </div>
-                                    <div className="text-sm leading-6">
-                                        <label htmlFor="isPublic" className="font-medium text-gray-900">
-                                            Public Test
-                                        </label>
-                                        <p className="text-gray-500">Allow students to take this test without logging in (Guest access).</p>
-                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     </div>
 

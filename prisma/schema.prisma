@@ -53,7 +53,7 @@ model Test {
   duration    Int       // Duration in minutes
   published   Boolean   @default(false)
   archived      Boolean   @default(false)
-  isPublic      Boolean   @default(false) // Allows guest access
+  visibility    TestVisibility @default(ORGANIZATION)
   bioDataFields Json?     // Stores the configuration of fields to collect
   creatorId     String
   creator     User      @relation("CreatedTests", fields: [creatorId], references: [id])
@@ -62,6 +62,23 @@ model Test {
 
   questions   Question[]
   submissions Submission[]
+  allowedUsers TestAllowedUser[]
+}
+
+enum TestVisibility {
+  PUBLIC
+  ORGANIZATION
+  WHITELIST
+}
+
+model TestAllowedUser {
+  id        String   @id @default(cuid())
+  testId    String
+  test      Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  email     String
+  createdAt DateTime @default(now())
+
+  @@unique([testId, email])
 }
 
 enum QuestionType {

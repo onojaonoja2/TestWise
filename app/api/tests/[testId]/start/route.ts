@@ -14,16 +14,36 @@ export async function POST(
         const body = await req.json()
         const { bioData, guestInfo } = body
 
-        // Fetch test to check if public
-        const test = await prisma.test.findUnique({ where: { id: testId } })
+        // Fetch test to check visibility and permissions
+        const test = await prisma.test.findUnique({
+            where: { id: testId },
+            include: {
+                creator: { select: { organizationId: true } },
+                allowedUsers: { select: { email: true } }
+            }
+        })
         if (!test) return new NextResponse("Test not found", { status: 404 })
 
-        if (!session) {
-            if (!test.isPublic) {
+        // Access Control Logic
+        if (test.visibility === 'PUBLIC') {
+            if (!session && (!guestInfo?.name || !guestInfo?.email)) {
+                return new NextResponse("Guest name and email are required", { status: 400 })
+            }
+        } else {
+            // For ORGANIZATION and WHITELIST, session is required
+            if (!session) {
                 return new NextResponse("Unauthorized", { status: 401 })
             }
-            if (!guestInfo?.name || !guestInfo?.email) {
-                return new NextResponse("Guest name and email are required", { status: 400 })
+
+            if (test.visibility === 'ORGANIZATION') {
+                if (!session.user.organizationId || session.user.organizationId !== test.creator.organizationId) {
+                    return new NextResponse("Access restricted to organization members", { status: 403 })
+                }
+            } else if (test.visibility === 'WHITELIST') {
+                const isAllowed = test.allowedUsers.some(u => u.email === session.user.email)
+                if (!isAllowed) {
+                    return new NextResponse("Access denied. You are not on the whitelist.", { status: 403 })
+                }
             }
         }
 
