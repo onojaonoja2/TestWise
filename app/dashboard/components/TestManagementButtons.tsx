@@ -7,9 +7,10 @@ interface TestManagementButtonsProps {
     testId: string
     published: boolean
     archived: boolean
+    isPublic?: boolean
 }
 
-export default function TestManagementButtons({ testId, published, archived }: TestManagementButtonsProps) {
+export default function TestManagementButtons({ testId, published, archived, isPublic }: TestManagementButtonsProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
 
@@ -39,8 +40,27 @@ export default function TestManagementButtons({ testId, published, archived }: T
         return <span className="text-gray-400 text-sm">Updating...</span>
     }
 
+    const copyLink = () => {
+        const link = `${window.location.origin}/test/${testId}`
+        navigator.clipboard.writeText(link)
+        alert("Link copied to clipboard!")
+    }
+
     return (
-        <div className="flex space-x-2 text-sm">
+        <div className="flex space-x-2 text-sm items-center">
+            {isPublic && (
+                <>
+                    <button
+                        onClick={copyLink}
+                        className="text-indigo-600 hover:text-indigo-900 font-medium"
+                        title="Copy Public Link"
+                    >
+                        Copy Link
+                    </button>
+                    <span className="text-gray-300">|</span>
+                </>
+            )}
+
             {!archived && (
                 <>
                     <button

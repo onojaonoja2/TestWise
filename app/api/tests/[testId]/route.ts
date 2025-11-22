@@ -10,10 +10,6 @@ export async function GET(
     const session = await getServerSession(authOptions)
     const { testId } = await params
 
-    if (!session) {
-        return new NextResponse("Unauthorized", { status: 401 })
-    }
-
     try {
         const test = await prisma.test.findUnique({
             where: {
@@ -37,7 +33,15 @@ export async function GET(
             return new NextResponse("Test not found", { status: 404 })
         }
 
-        // Check if test is published or if user is creator/admin
+        // Public Access Check
+        if (!session) {
+            if (test.isPublic && test.published) {
+                return NextResponse.json(test)
+            }
+            return new NextResponse("Unauthorized", { status: 401 })
+        }
+
+        // Authenticated Access Check
         if (!test.published && test.creatorId !== session.user.id && session.user.role !== 'ADMIN') {
             return new NextResponse("Test not available", { status: 403 })
         }

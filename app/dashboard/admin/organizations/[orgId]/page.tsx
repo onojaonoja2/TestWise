@@ -23,6 +23,10 @@ export default function OrganizationDetailsPage({ params }: { params: Promise<{ 
     const [newUser, setNewUser] = useState({ name: '', email: '', password: '', isSubAdmin: false })
     const [creating, setCreating] = useState(false)
 
+    const [selectedTeacher, setSelectedTeacher] = useState<User | null>(null)
+    const [teacherTests, setTeacherTests] = useState<any[]>([])
+    const [loadingTests, setLoadingTests] = useState(false)
+
     const isGlobalAdmin = session?.user?.role === 'ADMIN'
 
     useEffect(() => {
@@ -41,6 +45,27 @@ export default function OrganizationDetailsPage({ params }: { params: Promise<{ 
         } finally {
             setLoading(false)
         }
+    }
+
+    const fetchTeacherTests = async (userId: string) => {
+        setLoadingTests(true)
+        try {
+            const res = await fetch(`/api/users/${userId}/tests`)
+            if (res.ok) {
+                const data = await res.json()
+                setTeacherTests(data)
+            }
+        } catch (error) {
+            console.error('Failed to fetch tests', error)
+            alert('Failed to fetch tests')
+        } finally {
+            setLoadingTests(false)
+        }
+    }
+
+    const handleViewTests = (user: User) => {
+        setSelectedTeacher(user)
+        fetchTeacherTests(user.id)
     }
 
     const handleCreateUser = async (e: React.FormEvent) => {
@@ -109,6 +134,78 @@ export default function OrganizationDetailsPage({ params }: { params: Promise<{ 
     }
 
     if (loading) return <div className="p-8 text-center">Loading...</div>
+
+    if (selectedTeacher) {
+        return (
+            <div className="min-h-screen bg-gray-50 py-8">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div className="mb-8 flex items-center justify-between">
+                        <div>
+                            <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                                Tests by {selectedTeacher.name}
+                            </h2>
+                            <p className="mt-1 text-sm text-gray-500">{selectedTeacher.email}</p>
+                        </div>
+                        <div className="flex space-x-2">
+                            <button
+                                onClick={() => fetchTeacherTests(selectedTeacher.id)}
+                                className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-indigo-600 shadow-sm ring-1 ring-inset ring-indigo-300 hover:bg-indigo-50"
+                            >
+                                Refresh
+                            </button>
+                            <button
+                                onClick={() => setSelectedTeacher(null)}
+                                className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                            >
+                                Back to Teachers
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white shadow sm:rounded-lg overflow-hidden">
+                        {loadingTests ? (
+                            <div className="p-8 text-center">Loading tests...</div>
+                        ) : (
+                            <ul role="list" className="divide-y divide-gray-200">
+                                {teacherTests.map((test) => (
+                                    <li key={test.id} className="px-4 py-4 sm:px-6 hover:bg-gray-50">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <h3 className="text-lg font-medium text-indigo-600">{test.title}</h3>
+                                                <div className="mt-1 flex items-center space-x-2 text-sm text-gray-500">
+                                                    <span>Created: {new Date(test.createdAt).toLocaleDateString()}</span>
+                                                    <span>•</span>
+                                                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${test.archived ? 'bg-gray-100 text-gray-800' :
+                                                        test.published ? 'bg-green-100 text-green-800' :
+                                                            'bg-yellow-100 text-yellow-800'
+                                                        }`}>
+                                                        {test.archived ? 'Archived' : test.published ? 'Published' : 'Draft'}
+                                                    </span>
+                                                    {test.isPublic && (
+                                                        <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+                                                            Public
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                {/* Future: Add View/Edit Test buttons here */}
+                                            </div>
+                                        </div>
+                                    </li>
+                                ))}
+                                {teacherTests.length === 0 && (
+                                    <li className="px-4 py-8 text-center text-gray-500">
+                                        No tests found for this teacher.
+                                    </li>
+                                )}
+                            </ul>
+                        )}
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 py-8">
@@ -195,6 +292,12 @@ export default function OrganizationDetailsPage({ params }: { params: Promise<{ 
                                         </div>
                                     </div>
                                     <div className="flex items-center space-x-4">
+                                        <button
+                                            onClick={() => handleViewTests(user)}
+                                            className="text-sm font-medium text-indigo-600 hover:text-indigo-900"
+                                        >
+                                            View Tests
+                                        </button>
                                         <button
                                             onClick={() => handleToggleSubAdmin(user.id, user.isSubAdmin)}
                                             className={`text-sm font-medium ${user.isSubAdmin ? 'text-orange-600 hover:text-orange-900' : 'text-green-600 hover:text-green-900'}`}

@@ -22,6 +22,7 @@ export default function CreateTestPage() {
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
     const [duration, setDuration] = useState(60)
+    const [isPublic, setIsPublic] = useState(false)
     const [questions, setQuestions] = useState<QuestionDraft[]>([])
     const [bioDataFields, setBioDataFields] = useState<BioDataField[]>([])
     const [submitting, setSubmitting] = useState(false)
@@ -86,6 +87,7 @@ export default function CreateTestPage() {
                     title,
                     description,
                     duration,
+                    isPublic,
                     questions,
                     bioDataFields
                 })
@@ -167,6 +169,27 @@ export default function CreateTestPage() {
                                         onChange={(e) => setDescription(e.target.value)}
                                         className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                     />
+                                </div>
+                            </div>
+
+                            <div className="col-span-full">
+                                <div className="relative flex gap-x-3">
+                                    <div className="flex h-6 items-center">
+                                        <input
+                                            id="isPublic"
+                                            name="isPublic"
+                                            type="checkbox"
+                                            checked={isPublic}
+                                            onChange={(e) => setIsPublic(e.target.checked)}
+                                            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                                        />
+                                    </div>
+                                    <div className="text-sm leading-6">
+                                        <label htmlFor="isPublic" className="font-medium text-gray-900">
+                                            Public Test
+                                        </label>
+                                        <p className="text-gray-500">Allow students to take this test without logging in (Guest access).</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>

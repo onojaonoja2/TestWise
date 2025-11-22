@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 
 interface Question {
     id: string
@@ -27,6 +28,7 @@ interface Test {
 }
 
 export default function TestPage({ params }: { params: Promise<{ testId: string }> }) {
+    const { data: session, status: sessionStatus } = useSession()
     const { testId } = use(params)
     const router = useRouter()
     const [test, setTest] = useState<Test | null>(null)
@@ -34,22 +36,43 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
     const [answers, setAnswers] = useState<Record<string, string>>({})
     const [submitting, setSubmitting] = useState(false)
     const [warnings, setWarnings] = useState(0)
+    const [timeLeft, setTimeLeft] = useState<number | null>(null)
+    const [submissionId, setSubmissionId] = useState<string | null>(null)
 
-    // Bio Data State
+    // Bio Data & Guest State
     const [bioData, setBioData] = useState<Record<string, string>>({})
+    const [guestInfo, setGuestInfo] = useState({ name: '', email: '' })
     const [bioDataSubmitted, setBioDataSubmitted] = useState(false)
 
     useEffect(() => {
-        const fetchTest = async () => {
+        const initTest = async () => {
             try {
-                const res = await fetch(`/api/tests/${testId}`)
-                if (!res.ok) throw new Error('Failed to fetch test')
-                const data = await res.json()
-                setTest(data)
+                // Fetch Test Details
+                const testRes = await fetch(`/api/tests/${testId}`)
 
-                // If no bio data fields, mark as submitted
-                if (!data.bioDataFields || data.bioDataFields.length === 0) {
+                if (testRes.status === 401) {
+                    // Unauthorized and not public -> redirect to login
+                    router.push(`/auth/signin?callbackUrl=/test/${testId}`)
+                    return
+                }
+
+                if (!testRes.ok) throw new Error('Failed to fetch test')
+                const testData = await testRes.json()
+                setTest(testData)
+
+                // Check for existing submission
+                const statusRes = await fetch(`/api/tests/${testId}/start`)
+                if (statusRes.status === 200) {
+                    const submission = await statusRes.json()
+                    setSubmissionId(submission.id)
                     setBioDataSubmitted(true)
+
+                    // Calculate remaining time
+                    const startTime = new Date(submission.startTime).getTime()
+                    const durationMs = testData.duration * 60 * 1000
+                    const elapsed = Date.now() - startTime
+                    const remaining = Math.max(0, Math.ceil((durationMs - elapsed) / 1000))
+                    setTimeLeft(remaining)
                 }
             } catch (error) {
                 console.error(error)
@@ -58,8 +81,33 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
                 setLoading(false)
             }
         }
-        fetchTest()
-    }, [testId])
+        initTest()
+    }, [testId, router])
+
+    // Timer Logic
+    useEffect(() => {
+        if (!bioDataSubmitted || timeLeft === null || timeLeft <= 0) return
+
+        const timer = setInterval(() => {
+            setTimeLeft((prev) => {
+                if (prev === null || prev <= 0) {
+                    clearInterval(timer)
+                    return 0
+                }
+                return prev - 1
+            })
+        }, 1000)
+
+        return () => clearInterval(timer)
+    }, [bioDataSubmitted, timeLeft])
+
+    // Auto-Submit on Timeout
+    useEffect(() => {
+        if (timeLeft === 0 && !submitting) {
+            alert("Time's up! Your test is being submitted.")
+            handleSubmit(true) // Pass true to skip confirmation
+        }
+    }, [timeLeft, submitting])
 
     // Security: Fullscreen & Focus Tracking
     useEffect(() => {
@@ -131,6 +179,12 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
     const handleBioDataSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
+        // Validate Guest Info
+        if (!session && (!guestInfo.name || !guestInfo.email)) {
+            alert("Name and Email are required")
+            return
+        }
+
         if (test?.bioDataFields) {
             for (const field of test.bioDataFields) {
                 if (field.required && !bioData[field.label]) {
@@ -145,15 +199,30 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
             const res = await fetch(`/api/tests/${testId}/start`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ bioData })
+                body: JSON.stringify({ bioData, guestInfo })
             })
 
-            if (!res.ok) throw new Error("Failed to start test")
+            if (!res.ok) {
+                const msg = await res.text()
+                throw new Error(msg || "Failed to start test")
+            }
+
+            const submission = await res.json()
+            setSubmissionId(submission.id)
+
+            // Initialize timer
+            if (test) {
+                const startTime = new Date(submission.startTime).getTime()
+                const durationMs = test.duration * 60 * 1000
+                const elapsed = Date.now() - startTime
+                const remaining = Math.max(0, Math.ceil((durationMs - elapsed) / 1000))
+                setTimeLeft(remaining)
+            }
 
             setBioDataSubmitted(true)
         } catch (error) {
             console.error("Failed to start test", error)
-            alert("Failed to start test. Please try again.")
+            alert(error instanceof Error ? error.message : "Failed to start test")
         }
     }
 
@@ -161,20 +230,26 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
         setAnswers(prev => ({ ...prev, [questionId]: value }))
     }
 
-    const handleSubmit = async () => {
-        if (!confirm('Are you sure you want to submit?')) return
+    const handleSubmit = async (autoSubmit = false) => {
+        if (!autoSubmit && !confirm('Are you sure you want to submit?')) return
 
         setSubmitting(true)
         try {
             const res = await fetch(`/api/tests/${testId}/submit`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ answers, warnings })
+                body: JSON.stringify({ answers, warnings, submissionId })
             })
 
             if (!res.ok) throw new Error('Submission failed')
 
-            router.push('/dashboard') // Redirect to dashboard after submission
+            // If guest, maybe show a "Thank you" page instead of redirecting to dashboard?
+            if (!session) {
+                alert("Test submitted successfully! Thank you.")
+                router.push('/')
+            } else {
+                router.push('/dashboard')
+            }
         } catch (error) {
             console.error(error)
             alert('Failed to submit test')
@@ -182,7 +257,13 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
         }
     }
 
-    if (loading) return <div className="p-8 text-center">Loading test...</div>
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60)
+        const secs = seconds % 60
+        return `${mins}:${secs.toString().padStart(2, '0')}`
+    }
+
+    if (loading || sessionStatus === 'loading') return <div className="p-8 text-center">Loading test...</div>
     if (!test) return <div className="p-8 text-center">Test not found</div>
 
     // Bio Data Form
@@ -194,13 +275,52 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
                         {test.title}
                     </h2>
                     <p className="mt-2 text-center text-sm text-gray-600">
-                        Please provide your information to start the test.
+                        {test.bioDataFields && test.bioDataFields.length > 0
+                            ? "Please provide your information to start the test."
+                            : "Click below to start the test."}
                     </p>
                 </div>
 
                 <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
                     <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
                         <form className="space-y-6" onSubmit={handleBioDataSubmit}>
+                            {/* Guest Info Fields */}
+                            {!session && (
+                                <>
+                                    <div>
+                                        <label htmlFor="guestName" className="block text-sm font-medium text-gray-700">
+                                            Full Name <span className="text-red-500">*</span>
+                                        </label>
+                                        <div className="mt-1">
+                                            <input
+                                                id="guestName"
+                                                type="text"
+                                                required
+                                                value={guestInfo.name}
+                                                onChange={(e) => setGuestInfo({ ...guestInfo, name: e.target.value })}
+                                                className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label htmlFor="guestEmail" className="block text-sm font-medium text-gray-700">
+                                            Email Address <span className="text-red-500">*</span>
+                                        </label>
+                                        <div className="mt-1">
+                                            <input
+                                                id="guestEmail"
+                                                type="email"
+                                                required
+                                                value={guestInfo.email}
+                                                onChange={(e) => setGuestInfo({ ...guestInfo, email: e.target.value })}
+                                                className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="border-t border-gray-200 my-4"></div>
+                                </>
+                            )}
+
                             {test.bioDataFields?.map((field, index) => (
                                 <div key={index}>
                                     <label htmlFor={`field-${index}`} className="block text-sm font-medium text-gray-700">
@@ -236,7 +356,15 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 select-none">
-            <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            {/* Sticky Header with Timer */}
+            <div className="fixed top-0 left-0 right-0 bg-white shadow-md z-50 px-4 py-3 flex justify-between items-center">
+                <h2 className="text-lg font-bold text-gray-900 truncate max-w-xs">{test.title}</h2>
+                <div className={`text-xl font-mono font-bold ${timeLeft !== null && timeLeft < 60 ? 'text-red-600 animate-pulse' : 'text-indigo-600'}`}>
+                    Time Left: {timeLeft !== null ? formatTime(timeLeft) : '--:--'}
+                </div>
+            </div>
+
+            <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 mt-16">
                 {warnings > 0 && (
                     <div className="mb-4 rounded-md bg-red-50 p-4">
                         <div className="flex">
@@ -325,7 +453,7 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
 
                 <div className="mt-8 flex justify-end">
                     <button
-                        onClick={handleSubmit}
+                        onClick={() => handleSubmit(false)}
                         disabled={submitting}
                         className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
                     >

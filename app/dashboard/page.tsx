@@ -144,6 +144,11 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                                                                         Archived
                                                                     </p>
                                                                 )}
+                                                                {test.isPublic && (
+                                                                    <p className="inline-flex rounded-full bg-blue-100 px-2 text-xs font-semibold leading-5 text-blue-800">
+                                                                        Public
+                                                                    </p>
+                                                                )}
                                                             </div>
                                                         </div>
                                                         <div className="mt-2 sm:flex sm:justify-between">
@@ -175,6 +180,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                                                                         testId={test.id}
                                                                         published={test.published}
                                                                         archived={test.archived}
+                                                                        isPublic={test.isPublic}
                                                                     />
                                                                 </div>
                                                             </div>

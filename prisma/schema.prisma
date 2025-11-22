@@ -53,6 +53,7 @@ model Test {
   duration    Int       // Duration in minutes
   published   Boolean   @default(false)
   archived      Boolean   @default(false)
+  isPublic      Boolean   @default(false) // Allows guest access
   bioDataFields Json?     // Stores the configuration of fields to collect
   creatorId     String
   creator     User      @relation("CreatedTests", fields: [creatorId], references: [id])
@@ -88,8 +89,9 @@ model Submission {
   id          String    @id @default(cuid())
   testId      String
   test        Test      @relation(fields: [testId], references: [id])
-  studentId   String
-  student     User      @relation(fields: [studentId], references: [id])
+  studentId   String?   // Optional for guest users
+  student     User?     @relation(fields: [studentId], references: [id])
+  guestInfo   Json?     // Stores name/email for guest users
   startTime   DateTime  @default(now())
   endTime     DateTime?
   score       Int?
