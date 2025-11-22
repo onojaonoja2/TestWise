@@ -2,6 +2,7 @@ import NextAuth, { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { PrismaClient } from "@prisma/client"
+import { compare } from "bcryptjs"
 
 const prisma = new PrismaClient()
 
@@ -29,14 +30,17 @@ export const authOptions: NextAuthOptions = {
                     return null
                 }
 
-                // TODO: Implement password hashing verification here
-                // For now, simple comparison for prototype (INSECURE - FIX LATER)
-                if (user.password === credentials.password) {
+                // Verify password
+                const isValid = await compare(credentials.password, user.password!)
+
+                if (isValid) {
                     return {
                         id: user.id,
                         email: user.email,
                         name: user.name,
-                        role: user.role
+                        role: user.role,
+                        organizationId: user.organizationId,
+                        isSubAdmin: user.isSubAdmin
                     }
                 }
 
@@ -52,6 +56,8 @@ export const authOptions: NextAuthOptions = {
             if (user) {
                 token.role = user.role
                 token.id = user.id
+                token.organizationId = user.organizationId
+                token.isSubAdmin = user.isSubAdmin
             }
             return token
         },
@@ -59,6 +65,8 @@ export const authOptions: NextAuthOptions = {
             if (session.user) {
                 session.user.role = token.role as string
                 session.user.id = token.id as string
+                session.user.organizationId = token.organizationId
+                session.user.isSubAdmin = token.isSubAdmin
             }
             return session
         }

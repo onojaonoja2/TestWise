@@ -24,11 +24,26 @@ model User {
   image         String?
   password      String?
   role          UserRole  @default(STUDENT)
+  
+  // Organization & Permissions
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  isSubAdmin     Boolean       @default(false) // Only relevant if role is TEACHER
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   createdTests  Test[]    @relation("CreatedTests")
   submissions   Submission[]
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
 }
 
 model Test {

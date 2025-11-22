@@ -87,9 +87,17 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                         <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900">Dashboard</h1>
                         {(session.user.role === 'TEACHER' || session.user.role === 'ADMIN') && (
                             <div className="flex space-x-4">
+                                {session.user.isSubAdmin && (
+                                    <Link
+                                        href="/dashboard/organization"
+                                        className="text-sm font-medium text-indigo-600 hover:text-indigo-500 flex items-center"
+                                    >
+                                        Manage Organization
+                                    </Link>
+                                )}
                                 <Link
                                     href={showArchived ? "/dashboard" : "/dashboard?view=archived"}
-                                    className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                                    className="text-sm font-medium text-indigo-600 hover:text-indigo-500 flex items-center"
                                 >
                                     {showArchived ? "View Active Tests" : "View Archived Tests"}
                                 </Link>

@@ -1,0 +1,46 @@
+
+> testwise@0.1.0 build
+> next build
+
+   ▲ Next.js 16.0.3 (Turbopack)
+   - Environments: .env
+
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+   Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 2 errors:
+./app/api/organizations/route.ts:3:1
+Module not found: Can't resolve '../../auth/[...nextauth]/route'
+  1 | import { NextResponse } from "next/server"
+  2 | import { getServerSession } from "next-auth"
+> 3 | import { authOptions } from "../../auth/[...nextauth]/route"
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { prisma } from "@/lib/prisma"
+  5 |
+  6 | export async function POST(req: Request) {
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+./app/api/organizations/[orgId]/users/route.ts:5:1
+Module not found: Can't resolve 'bcryptjs'
+  3 | import { authOptions } from "../../../auth/[...nextauth]/route"
+  4 | import { prisma } from "@/lib/prisma"
+> 5 | import { hash } from "bcryptjs"
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 |
+  7 | export async function POST(
+  8 |     req: Request,
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (./app/api/organizations/route.ts:3:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (./app/api/organizations/[orgId]/users/route.ts:5:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)

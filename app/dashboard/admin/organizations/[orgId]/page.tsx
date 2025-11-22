@@ -1,0 +1,229 @@
+'use client'
+
+import { useState, useEffect, use } from 'react'
+import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import { Plus, Trash2, Shield, ShieldOff, User as UserIcon } from 'lucide-react'
+
+interface User {
+    id: string
+    name: string
+    email: string
+    role: string
+    isSubAdmin: boolean
+    createdAt: string
+}
+
+export default function OrganizationDetailsPage({ params }: { params: Promise<{ orgId: string }> }) {
+    const { orgId } = use(params)
+    const router = useRouter()
+    const { data: session } = useSession()
+    const [users, setUsers] = useState<User[]>([])
+    const [loading, setLoading] = useState(true)
+    const [newUser, setNewUser] = useState({ name: '', email: '', password: '', isSubAdmin: false })
+    const [creating, setCreating] = useState(false)
+
+    const isGlobalAdmin = session?.user?.role === 'ADMIN'
+
+    useEffect(() => {
+        fetchUsers()
+    }, [orgId])
+
+    const fetchUsers = async () => {
+        try {
+            const res = await fetch(`/api/organizations/${orgId}/users`)
+            if (res.ok) {
+                const data = await res.json()
+                setUsers(data)
+            }
+        } catch (error) {
+            console.error('Failed to fetch users', error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleCreateUser = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!newUser.name || !newUser.email || !newUser.password) return
+
+        setCreating(true)
+        try {
+            const res = await fetch(`/api/organizations/${orgId}/users`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newUser)
+            })
+
+            if (res.ok) {
+                setNewUser({ name: '', email: '', password: '', isSubAdmin: false })
+                fetchUsers()
+            } else {
+                const msg = await res.text()
+                alert(`Failed to create user: ${msg}`)
+            }
+        } catch (error) {
+            console.error(error)
+            alert('Error creating user')
+        } finally {
+            setCreating(false)
+        }
+    }
+
+    const handleToggleSubAdmin = async (userId: string, currentStatus: boolean) => {
+        try {
+            const res = await fetch(`/api/users/${userId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isSubAdmin: !currentStatus })
+            })
+
+            if (res.ok) {
+                fetchUsers()
+            } else {
+                alert('Failed to update user')
+            }
+        } catch (error) {
+            console.error(error)
+            alert('Error updating user')
+        }
+    }
+
+    const handleDeleteUser = async (userId: string) => {
+        if (!confirm('Are you sure you want to delete this user?')) return
+
+        try {
+            const res = await fetch(`/api/users/${userId}`, {
+                method: 'DELETE'
+            })
+
+            if (res.ok) {
+                fetchUsers()
+            } else {
+                alert('Failed to delete user')
+            }
+        } catch (error) {
+            console.error(error)
+            alert('Error deleting user')
+        }
+    }
+
+    if (loading) return <div className="p-8 text-center">Loading...</div>
+
+    return (
+        <div className="min-h-screen bg-gray-50 py-8">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="md:flex md:items-center md:justify-between mb-8">
+                    <div className="min-w-0 flex-1">
+                        <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                            Organization Users
+                        </h2>
+                    </div>
+                </div>
+
+                {/* Create User Form */}
+                <div className="bg-white shadow sm:rounded-lg p-6 mb-8">
+                    <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Add New Teacher</h3>
+                    <form onSubmit={handleCreateUser} className="space-y-4">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                            <input
+                                type="text"
+                                value={newUser.name}
+                                onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                                placeholder="Name"
+                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            />
+                            <input
+                                type="email"
+                                value={newUser.email}
+                                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                                placeholder="Email"
+                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            />
+                            <input
+                                type="password"
+                                value={newUser.password}
+                                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                                placeholder="Password"
+                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            />
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <label className="flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    checked={newUser.isSubAdmin}
+                                    onChange={(e) => setNewUser({ ...newUser, isSubAdmin: e.target.checked })}
+                                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                />
+                                <span className="text-sm text-gray-700">Make Sub-Admin</span>
+                            </label>
+                            <button
+                                type="submit"
+                                disabled={creating || !newUser.name || !newUser.email || !newUser.password}
+                                className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+                            >
+                                <Plus className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
+                                Add Teacher
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                {/* Users List */}
+                <div className="bg-white shadow sm:rounded-lg overflow-hidden">
+                    <ul role="list" className="divide-y divide-gray-200">
+                        {users.map((user) => (
+                            <li key={user.id} className="px-4 py-4 sm:px-6 hover:bg-gray-50">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center">
+                                        <div className="flex-shrink-0">
+                                            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gray-500">
+                                                <UserIcon className="h-6 w-6 text-white" />
+                                            </span>
+                                        </div>
+                                        <div className="ml-4">
+                                            <div className="flex items-center">
+                                                <p className="truncate text-sm font-medium text-indigo-600">{user.name}</p>
+                                                {user.isSubAdmin && (
+                                                    <span className="ml-2 inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+                                                        Sub-Admin
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-sm text-gray-500">{user.email}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-4">
+                                        <button
+                                            onClick={() => handleToggleSubAdmin(user.id, user.isSubAdmin)}
+                                            className={`text-sm font-medium ${user.isSubAdmin ? 'text-orange-600 hover:text-orange-900' : 'text-green-600 hover:text-green-900'}`}
+                                            title={user.isSubAdmin ? "Remove Sub-Admin" : "Make Sub-Admin"}
+                                        >
+                                            {user.isSubAdmin ? <ShieldOff className="h-5 w-5" /> : <Shield className="h-5 w-5" />}
+                                        </button>
+
+                                        {isGlobalAdmin && (
+                                            <button
+                                                onClick={() => handleDeleteUser(user.id)}
+                                                className="text-red-600 hover:text-red-900"
+                                                title="Delete User"
+                                            >
+                                                <Trash2 className="h-5 w-5" />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </li>
+                        ))}
+                        {users.length === 0 && (
+                            <li className="px-4 py-8 text-center text-gray-500">
+                                No teachers found in this organization.
+                            </li>
+                        )}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    )
+}

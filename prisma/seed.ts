@@ -1,16 +1,21 @@
 import { PrismaClient } from '@prisma/client'
+import { hash } from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
 async function main() {
+    const password = await hash('password123', 12)
+
     // Admin User
     const admin = await prisma.user.upsert({
         where: { email: 'admin@example.com' },
-        update: {},
+        update: {
+            password // Update password if user exists
+        },
         create: {
             email: 'admin@example.com',
             name: 'Admin User',
-            password: 'password123', // In a real app, hash this!
+            password,
             role: 'ADMIN',
         },
     })
@@ -18,11 +23,13 @@ async function main() {
     // Teacher User
     const teacher = await prisma.user.upsert({
         where: { email: 'teacher@example.com' },
-        update: {},
+        update: {
+            password
+        },
         create: {
             email: 'teacher@example.com',
             name: 'Teacher User',
-            password: 'password123',
+            password,
             role: 'TEACHER',
         },
     })
@@ -30,11 +37,13 @@ async function main() {
     // Student User
     const student = await prisma.user.upsert({
         where: { email: 'student@example.com' },
-        update: {},
+        update: {
+            password
+        },
         create: {
             email: 'student@example.com',
             name: 'Student User',
-            password: 'password123',
+            password,
             role: 'STUDENT',
         },
     })

@@ -1,0 +1,249 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { Plus, User as UserIcon, Edit2, X, Check } from 'lucide-react'
+
+interface User {
+    id: string
+    name: string
+    email: string
+    role: string
+    isSubAdmin: boolean
+    createdAt: string
+}
+
+export default function OrganizationManagementPage() {
+    const { data: session } = useSession()
+    const router = useRouter()
+    const [users, setUsers] = useState<User[]>([])
+    const [loading, setLoading] = useState(true)
+    const [newUser, setNewUser] = useState({ name: '', email: '', password: '' })
+    const [creating, setCreating] = useState(false)
+    const [editingId, setEditingId] = useState<string | null>(null)
+    const [editForm, setEditForm] = useState({ name: '', email: '' })
+
+    useEffect(() => {
+        if (session?.user?.organizationId) {
+            fetchUsers()
+        } else if (session && !session.user.organizationId) {
+            // Not in an organization
+            setLoading(false)
+        }
+    }, [session])
+
+    const fetchUsers = async () => {
+        if (!session?.user?.organizationId) return
+        try {
+            const res = await fetch(`/api/organizations/${session.user.organizationId}/users`)
+            if (res.ok) {
+                const data = await res.json()
+                setUsers(data)
+            }
+        } catch (error) {
+            console.error('Failed to fetch users', error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleCreateUser = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!newUser.name || !newUser.email || !newUser.password) return
+
+        setCreating(true)
+        try {
+            const res = await fetch(`/api/organizations/${session?.user?.organizationId}/users`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newUser)
+            })
+
+            if (res.ok) {
+                setNewUser({ name: '', email: '', password: '' })
+                fetchUsers()
+            } else {
+                const msg = await res.text()
+                alert(`Failed to create user: ${msg}`)
+            }
+        } catch (error) {
+            console.error(error)
+            alert('Error creating user')
+        } finally {
+            setCreating(false)
+        }
+    }
+
+    const startEditing = (user: User) => {
+        setEditingId(user.id)
+        setEditForm({ name: user.name, email: user.email })
+    }
+
+    const cancelEditing = () => {
+        setEditingId(null)
+        setEditForm({ name: '', email: '' })
+    }
+
+    const saveEdit = async (userId: string) => {
+        try {
+            const res = await fetch(`/api/users/${userId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(editForm)
+            })
+
+            if (res.ok) {
+                setEditingId(null)
+                fetchUsers()
+            } else {
+                alert('Failed to update user')
+            }
+        } catch (error) {
+            console.error(error)
+            alert('Error updating user')
+        }
+    }
+
+    if (loading) return <div className="p-8 text-center">Loading...</div>
+
+    if (!session?.user?.isSubAdmin) {
+        return <div className="p-8 text-center text-red-600">Unauthorized: You must be a Sub-Admin to view this page.</div>
+    }
+
+    return (
+        <div className="min-h-screen bg-gray-50 py-8">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="md:flex md:items-center md:justify-between mb-8">
+                    <div className="min-w-0 flex-1">
+                        <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                            Manage Organization
+                        </h2>
+                    </div>
+                </div>
+
+                {/* Create User Form */}
+                <div className="bg-white shadow sm:rounded-lg p-6 mb-8">
+                    <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Add New Teacher</h3>
+                    <form onSubmit={handleCreateUser} className="space-y-4">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                            <input
+                                type="text"
+                                value={newUser.name}
+                                onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                                placeholder="Name"
+                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            />
+                            <input
+                                type="email"
+                                value={newUser.email}
+                                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                                placeholder="Email"
+                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            />
+                            <input
+                                type="password"
+                                value={newUser.password}
+                                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                                placeholder="Password"
+                                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            />
+                        </div>
+                        <div className="flex justify-end">
+                            <button
+                                type="submit"
+                                disabled={creating || !newUser.name || !newUser.email || !newUser.password}
+                                className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+                            >
+                                <Plus className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
+                                Add Teacher
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                {/* Users List */}
+                <div className="bg-white shadow sm:rounded-lg overflow-hidden">
+                    <ul role="list" className="divide-y divide-gray-200">
+                        {users.map((user) => (
+                            <li key={user.id} className="px-4 py-4 sm:px-6 hover:bg-gray-50">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center flex-1">
+                                        <div className="flex-shrink-0">
+                                            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gray-500">
+                                                <UserIcon className="h-6 w-6 text-white" />
+                                            </span>
+                                        </div>
+                                        <div className="ml-4 flex-1">
+                                            {editingId === user.id ? (
+                                                <div className="flex items-center space-x-2">
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.name}
+                                                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                                                        className="block w-full rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                                    />
+                                                    <input
+                                                        type="email"
+                                                        value={editForm.email}
+                                                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                                                        className="block w-full rounded-md border-0 py-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div>
+                                                    <div className="flex items-center">
+                                                        <p className="truncate text-sm font-medium text-indigo-600">{user.name}</p>
+                                                        {user.isSubAdmin && (
+                                                            <span className="ml-2 inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+                                                                Sub-Admin
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-sm text-gray-500">{user.email}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-4 ml-4">
+                                        {editingId === user.id ? (
+                                            <>
+                                                <button
+                                                    onClick={() => saveEdit(user.id)}
+                                                    className="text-green-600 hover:text-green-900"
+                                                    title="Save"
+                                                >
+                                                    <Check className="h-5 w-5" />
+                                                </button>
+                                                <button
+                                                    onClick={cancelEditing}
+                                                    className="text-red-600 hover:text-red-900"
+                                                    title="Cancel"
+                                                >
+                                                    <X className="h-5 w-5" />
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <button
+                                                onClick={() => startEditing(user)}
+                                                className="text-gray-400 hover:text-gray-600"
+                                                title="Edit"
+                                            >
+                                                <Edit2 className="h-5 w-5" />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </li>
+                        ))}
+                        {users.length === 0 && (
+                            <li className="px-4 py-8 text-center text-gray-500">
+                                No teachers found in your organization.
+                            </li>
+                        )}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    )
+}
