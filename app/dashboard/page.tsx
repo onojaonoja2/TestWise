@@ -54,7 +54,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                     visibility: 'WHITELIST',
                     allowedUsers: {
                         some: {
-                            email: session.user.email
+                            email: session.user.email || undefined
                         }
                     }
                 }
@@ -122,6 +122,12 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                                     className="text-sm font-medium text-indigo-600 hover:text-indigo-500 flex items-center"
                                 >
                                     {showArchived ? "View Active Tests" : "View Archived Tests"}
+                                </Link>
+                                <Link
+                                    href="/dashboard/groups"
+                                    className="text-sm font-medium text-indigo-600 hover:text-indigo-500 flex items-center"
+                                >
+                                    Manage Groups
                                 </Link>
                                 <Link
                                     href="/dashboard/create"
@@ -208,6 +214,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                                                                         published={test.published}
                                                                         archived={test.archived}
                                                                         visibility={test.visibility}
+                                                                        submissionCount={test._count.submissions}
                                                                     />
                                                                 </div>
                                                             </div>
@@ -280,7 +287,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                     )}
 
                 </div>
-            </main>
-        </div>
+            </main >
+        </div >
     )
 }

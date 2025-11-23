@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface QuestionDraft {
@@ -17,8 +17,10 @@ interface BioDataField {
     required: boolean
 }
 
-export default function CreateTestPage() {
+export default function EditTestPage({ params }: { params: Promise<{ testId: string }> }) {
+    const { testId } = use(params)
     const router = useRouter()
+    const [loading, setLoading] = useState(true)
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
     const [duration, setDuration] = useState(60)
@@ -27,15 +29,8 @@ export default function CreateTestPage() {
     const [questions, setQuestions] = useState<QuestionDraft[]>([])
     const [bioDataFields, setBioDataFields] = useState<BioDataField[]>([])
     const [submitting, setSubmitting] = useState(false)
-    const [groups, setGroups] = useState<{ id: string, name: string }[]>([])
-
-    useEffect(() => {
-        // Fetch groups for import dropdown
-        fetch('/api/groups')
-            .then(res => res.ok ? res.json() : [])
-            .then(data => setGroups(data))
-            .catch(err => console.error("Failed to fetch groups", err))
-    }, [])
+    const [published, setPublished] = useState(false)
+    const [archived, setArchived] = useState(false)
 
     // Temporary state for new question being added
     const [newQ, setNewQ] = useState<QuestionDraft>({
@@ -45,6 +40,36 @@ export default function CreateTestPage() {
         points: 1,
         correctAnswer: ''
     })
+
+    useEffect(() => {
+        const fetchTest = async () => {
+            try {
+                const res = await fetch(`/api/tests/${testId}`)
+                if (!res.ok) throw new Error("Failed to fetch test")
+                const data = await res.json()
+
+                setTitle(data.title)
+                setDescription(data.description || '')
+                setDuration(data.duration)
+                setVisibility(data.visibility)
+                setPublished(data.published)
+                setArchived(data.archived)
+                setQuestions(data.questions || [])
+                setBioDataFields(data.bioDataFields || [])
+
+                if (data.allowedUsers) {
+                    setAllowedEmails(data.allowedUsers.map((u: any) => u.email).join(', '))
+                }
+            } catch (error) {
+                console.error(error)
+                alert("Failed to load test data")
+                router.push('/dashboard')
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchTest()
+    }, [testId, router])
 
     const addQuestion = () => {
         if (!newQ.text) return alert('Question text is required')
@@ -88,18 +113,24 @@ export default function CreateTestPage() {
         if (!title) return alert('Title is required')
         if (questions.length === 0) return alert('Add at least one question')
 
+        if (!confirm("Saving changes will overwrite existing questions. If students have already taken this test, their answers to deleted questions might be lost or become invalid. Continue?")) {
+            return
+        }
+
         setSubmitting(true)
         try {
             const emailList = visibility === 'WHITELIST' ? allowedEmails.split(',').map(e => e.trim()).filter(e => e) : []
 
-            const res = await fetch('/api/tests', {
-                method: 'POST',
+            const res = await fetch(`/api/tests/${testId}`, {
+                method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     title,
                     description,
                     duration,
                     visibility,
+                    published,
+                    archived,
                     allowedEmails: emailList,
                     questions,
                     bioDataFields
@@ -111,16 +142,18 @@ export default function CreateTestPage() {
                 router.refresh()
             } else {
                 const msg = await res.text()
-                console.error(`Failed to create test: ${msg}`)
-                alert(`Failed to create test. Check console for details.`)
+                console.error(`Failed to update test: ${msg}`)
+                alert(`Failed to update test. Check console for details.`)
                 setSubmitting(false)
             }
         } catch (error) {
             console.error(error)
-            alert('Failed to create test. Check console for details.')
+            alert('Failed to update test. Check console for details.')
             setSubmitting(false)
         }
     }
+
+    if (loading) return <div className="p-8 text-center">Loading test data...</div>
 
     return (
         <div className="min-h-screen bg-gray-50 py-8">
@@ -128,7 +161,7 @@ export default function CreateTestPage() {
                 <div className="md:flex md:items-center md:justify-between mb-8">
                     <div className="min-w-0 flex-1">
                         <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-                            Create New Test
+                            Edit Test: {title}
                         </h2>
                     </div>
                 </div>
@@ -214,37 +247,6 @@ export default function CreateTestPage() {
                                     <label htmlFor="allowedEmails" className="block text-sm font-medium leading-6 text-gray-900">
                                         Allowed Emails (comma separated)
                                     </label>
-
-                                    {/* Group Import Section */}
-                                    <div className="mt-2 mb-2 flex items-center gap-2">
-                                        <select
-                                            className="block w-64 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                            onChange={async (e) => {
-                                                const groupId = e.target.value
-                                                if (!groupId) return
-
-                                                try {
-                                                    const res = await fetch(`/api/groups/${groupId}/students`)
-                                                    if (res.ok) {
-                                                        const students: { email: string }[] = await res.json()
-                                                        const emails = students.map(s => s.email).join(', ')
-                                                        setAllowedEmails(prev => prev ? `${prev}, ${emails}` : emails)
-                                                    }
-                                                } catch (error) {
-                                                    console.error("Failed to import group", error)
-                                                    alert("Failed to import group members")
-                                                }
-                                                e.target.value = "" // Reset select
-                                            }}
-                                        >
-                                            <option value="">Import from Group...</option>
-                                            {groups.map(g => (
-                                                <option key={g.id} value={g.id}>{g.name}</option>
-                                            ))}
-                                        </select>
-                                        <span className="text-xs text-gray-500">Select a group to append members</span>
-                                    </div>
-
                                     <div className="mt-2">
                                         <textarea
                                             id="allowedEmails"
@@ -258,6 +260,42 @@ export default function CreateTestPage() {
                                     </div>
                                 </div>
                             )}
+
+                            <div className="col-span-full flex space-x-6">
+                                <div className="relative flex gap-x-3">
+                                    <div className="flex h-6 items-center">
+                                        <input
+                                            id="published"
+                                            name="published"
+                                            type="checkbox"
+                                            checked={published}
+                                            onChange={(e) => setPublished(e.target.checked)}
+                                            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                                        />
+                                    </div>
+                                    <div className="text-sm leading-6">
+                                        <label htmlFor="published" className="font-medium text-gray-900">Published</label>
+                                        <p className="text-gray-500">Make this test available to students.</p>
+                                    </div>
+                                </div>
+
+                                <div className="relative flex gap-x-3">
+                                    <div className="flex h-6 items-center">
+                                        <input
+                                            id="archived"
+                                            name="archived"
+                                            type="checkbox"
+                                            checked={archived}
+                                            onChange={(e) => setArchived(e.target.checked)}
+                                            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                                        />
+                                    </div>
+                                    <div className="text-sm leading-6">
+                                        <label htmlFor="archived" className="font-medium text-gray-900">Archived</label>
+                                        <p className="text-gray-500">Hide this test from lists but keep data.</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -459,7 +497,7 @@ export default function CreateTestPage() {
                             disabled={submitting}
                             className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
                         >
-                            {submitting ? 'Creating...' : 'Create Test'}
+                            {submitting ? 'Saving...' : 'Save Changes'}
                         </button>
                     </div>
                 </form>

@@ -125,8 +125,27 @@ export default function AdminDashboard() {
                                     </p>
                                 </Link>
                             </div>
-                            <div className="flex-shrink-0">
-                                <ArrowRight className="h-5 w-5 text-gray-400" />
+                            <div className="flex-shrink-0 flex items-center space-x-2 relative z-10">
+                                <Link href={`/dashboard/admin/organizations/${org.id}`} className="text-gray-400 hover:text-gray-500">
+                                    <ArrowRight className="h-5 w-5" />
+                                </Link>
+                                <button
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        if (confirm(`Are you sure you want to delete ${org.name}? This will delete ALL users and data associated with it.`)) {
+                                            // Call delete API
+                                            fetch(`/api/organizations/${org.id}`, { method: 'DELETE' })
+                                                .then(res => {
+                                                    if (res.ok) fetchOrganizations()
+                                                    else alert('Failed to delete organization')
+                                                })
+                                        }
+                                    }}
+                                    className="text-red-400 hover:text-red-600 p-1"
+                                    title="Delete Organization"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
+                                </button>
                             </div>
                         </div>
                     ))}

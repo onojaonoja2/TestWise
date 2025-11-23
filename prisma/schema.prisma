@@ -26,8 +26,9 @@ model User {
   role          UserRole  @default(STUDENT)
   
   // Organization & Permissions
+  // Organization & Permissions
   organizationId String?
-  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   isSubAdmin     Boolean       @default(false) // Only relevant if role is TEACHER
 
   createdAt     DateTime  @default(now())
@@ -35,6 +36,10 @@ model User {
 
   createdTests  Test[]    @relation("CreatedTests")
   submissions   Submission[]
+  
+  // Student Groups
+  studentGroups StudentGroupMember[]
+  createdGroups StudentGroup[] @relation("CreatedGroups")
 }
 
 model Organization {
@@ -44,6 +49,27 @@ model Organization {
   updatedAt DateTime @updatedAt
 
   users     User[]
+}
+
+model StudentGroup {
+  id        String   @id @default(cuid())
+  name      String
+  creatorId String
+  creator   User     @relation("CreatedGroups", fields: [creatorId], references: [id], onDelete: Cascade)
+  members   StudentGroupMember[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model StudentGroupMember {
+  id        String       @id @default(cuid())
+  groupId   String
+  group     StudentGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  studentId String
+  student   User         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  createdAt DateTime     @default(now())
+
+  @@unique([groupId, studentId])
 }
 
 model Test {
