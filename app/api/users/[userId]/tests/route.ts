@@ -36,7 +36,7 @@ export async function GET(
                 published: true,
                 archived: true,
                 createdAt: true,
-                isPublic: true
+                visibility: true
             },
             orderBy: {
                 createdAt: 'desc'
