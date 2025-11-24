@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import BackButton from '@/app/components/BackButton'
 
 interface QuestionDraft {
     text: string
@@ -125,11 +126,14 @@ export default function CreateTestPage() {
     return (
         <div className="min-h-screen bg-gray-50 py-8">
             <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-                <div className="md:flex md:items-center md:justify-between mb-8">
-                    <div className="min-w-0 flex-1">
-                        <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-                            Create New Test
-                        </h2>
+                <div className="mb-8">
+                    <BackButton href="/dashboard" label="Back to Dashboard" className="mb-4" />
+                    <div className="md:flex md:items-center md:justify-between">
+                        <div className="min-w-0 flex-1">
+                            <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                                Create New Test
+                            </h2>
+                        </div>
                     </div>
                 </div>
 

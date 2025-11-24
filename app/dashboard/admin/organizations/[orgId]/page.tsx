@@ -4,6 +4,7 @@ import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Plus, Trash2, Shield, ShieldOff, User as UserIcon } from 'lucide-react'
+import BackButton from '@/app/components/BackButton'
 
 interface User {
     id: string
@@ -210,11 +211,14 @@ export default function OrganizationDetailsPage({ params }: { params: Promise<{ 
     return (
         <div className="min-h-screen bg-gray-50 py-8">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="md:flex md:items-center md:justify-between mb-8">
-                    <div className="min-w-0 flex-1">
-                        <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-                            Organization Users
-                        </h2>
+                <div className="mb-8">
+                    <BackButton href="/dashboard/admin" label="Back to Organizations" className="mb-4" />
+                    <div className="md:flex md:items-center md:justify-between">
+                        <div className="min-w-0 flex-1">
+                            <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                                Organization Users
+                            </h2>
+                        </div>
                     </div>
                 </div>
 

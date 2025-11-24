@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
+import BackButton from '@/app/components/BackButton'
 
 interface ActiveStudent {
     id: string
@@ -48,19 +49,19 @@ export default function MonitorPage({ params }: { params: Promise<{ testId: stri
     return (
         <div className="min-h-screen bg-gray-50 py-8">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="mb-8 flex items-center justify-between">
-                    <div>
-                        <Link href="/dashboard" className="text-indigo-600 hover:text-indigo-500">
-                            &larr; Back to Dashboard
-                        </Link>
-                        <h1 className="mt-2 text-2xl font-bold text-gray-900">Live Exam Monitor</h1>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <span className="relative flex h-3 w-3">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                        </span>
-                        <span className="text-sm text-gray-500">Live Updates</span>
+                <div className="mb-8">
+                    <BackButton href="/dashboard" label="Back to Dashboard" className="mb-4" />
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="mt-2 text-2xl font-bold text-gray-900">Live Exam Monitor</h1>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <span className="relative flex h-3 w-3">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                            </span>
+                            <span className="text-sm text-gray-500">Live Updates</span>
+                        </div>
                     </div>
                 </div>
 

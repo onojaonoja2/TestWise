@@ -3,6 +3,7 @@ import { authOptions } from "../../../../api/auth/[...nextauth]/route"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import Link from "next/link"
+import BackButton from "@/app/components/BackButton"
 
 export default async function TestResultsPage({ params }: { params: Promise<{ testId: string }> }) {
     const session = await getServerSession(authOptions)
@@ -41,15 +42,15 @@ export default async function TestResultsPage({ params }: { params: Promise<{ te
     return (
         <div className="min-h-screen bg-gray-50 py-8">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="mb-8 flex items-center justify-between">
-                    <div>
-                        <Link href="/dashboard" className="text-indigo-600 hover:text-indigo-500">
-                            &larr; Back to Dashboard
-                        </Link>
-                        <h1 className="mt-2 text-2xl font-bold text-gray-900">{test.title} - Class Results</h1>
-                    </div>
-                    <div className="text-sm text-gray-500">
-                        Total Submissions: {test.submissions.length}
+                <div className="mb-8">
+                    <BackButton href="/dashboard" label="Back to Dashboard" className="mb-4" />
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="mt-2 text-2xl font-bold text-gray-900">{test.title} - Class Results</h1>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                            Total Submissions: {test.submissions.length}
+                        </div>
                     </div>
                 </div>
 
