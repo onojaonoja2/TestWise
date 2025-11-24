@@ -6,8 +6,8 @@ import { Providers } from "./providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "TestWise - Secure Testing Platform",
-  description: "A secure, web-based test-taking application.",
+  title: "TestWise - Smart Exam Management",
+  description: "A secure, intelligent platform for creating, managing, and monitoring online examinations.",
 };
 
 export default function RootLayout({
