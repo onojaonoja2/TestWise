@@ -48,8 +48,16 @@ export default async function TestResultsPage({ params }: { params: Promise<{ te
                         <div>
                             <h1 className="mt-2 text-2xl font-bold text-gray-900">{test.title} - Class Results</h1>
                         </div>
-                        <div className="text-sm text-gray-500">
-                            Total Submissions: {test.submissions.length}
+                        <div className="flex items-center gap-4">
+                            <div className="text-sm text-gray-500">
+                                Total Submissions: {test.submissions.length}
+                            </div>
+                            <a
+                                href={`/api/tests/${testId}/export`}
+                                className="inline-flex items-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
+                            >
+                                Export to Excel
+                            </a>
                         </div>
                     </div>
                 </div>
