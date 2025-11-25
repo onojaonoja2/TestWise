@@ -189,8 +189,15 @@ export default function OrganizationDetailsPage({ params }: { params: Promise<{ 
                                                     )}
                                                 </div>
                                             </div>
-                                            <div>
-                                                {/* Future: Add View/Edit Test buttons here */}
+                                            <div className="flex items-center space-x-4">
+                                                <a
+                                                    href={`/dashboard/test/${test.id}/results`}
+                                                    className="text-sm font-medium text-indigo-600 hover:text-indigo-900"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    Results
+                                                </a>
                                             </div>
                                         </div>
                                     </li>

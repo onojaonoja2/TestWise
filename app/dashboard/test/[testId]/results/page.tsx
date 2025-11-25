@@ -13,8 +13,27 @@ export default async function TestResultsPage({ params }: { params: Promise<{ te
         redirect("/auth/signin")
     }
 
-    // Only teachers/admins can view class results
-    if (session.user.role === 'STUDENT') {
+    // Access Control
+    let hasAccess = false
+
+    if (session.user.role === 'ADMIN') {
+        hasAccess = true
+    } else if (session.user.role === 'TEACHER') {
+        const testCheck = await prisma.test.findUnique({
+            where: { id: testId },
+            select: { creatorId: true, creator: { select: { organizationId: true } } }
+        })
+
+        if (testCheck) {
+            if (testCheck.creatorId === session.user.id) {
+                hasAccess = true
+            } else if (session.user.isSubAdmin && testCheck.creator.organizationId === session.user.organizationId) {
+                hasAccess = true
+            }
+        }
+    }
+
+    if (!hasAccess) {
         return <div>Unauthorized</div>
     }
 

@@ -15,8 +15,28 @@ export async function GET(
         return new NextResponse("Unauthorized", { status: 401 })
     }
 
-    // Only teachers/admins can export results
-    if (session.user.role === 'STUDENT') {
+    // Access Control
+    let hasAccess = false
+
+    if (session.user.role === 'ADMIN') {
+        hasAccess = true
+    } else if (session.user.role === 'TEACHER') {
+        // Teachers can access if they created it OR if they are sub-admin of the creator's org
+        const testCheck = await prisma.test.findUnique({
+            where: { id: testId },
+            select: { creatorId: true, creator: { select: { organizationId: true } } }
+        })
+
+        if (testCheck) {
+            if (testCheck.creatorId === session.user.id) {
+                hasAccess = true
+            } else if (session.user.isSubAdmin && testCheck.creator.organizationId === session.user.organizationId) {
+                hasAccess = true
+            }
+        }
+    }
+
+    if (!hasAccess) {
         return new NextResponse("Forbidden", { status: 403 })
     }
 
