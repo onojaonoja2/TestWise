@@ -126,8 +126,10 @@ export async function GET(
         const submission = await prisma.submission.findFirst({
             where: {
                 testId: testId,
-                studentId: session.user.id,
-                status: 'STARTED'
+                studentId: session.user.id
+            },
+            orderBy: {
+                startTime: 'desc'
             }
         })
 

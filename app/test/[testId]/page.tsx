@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useSession, signIn } from 'next-auth/react'
 
 interface Question {
     id: string
@@ -41,7 +41,8 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
 
     // Bio Data & Guest State
     const [bioData, setBioData] = useState<Record<string, string>>({})
-    const [guestInfo, setGuestInfo] = useState({ name: '', email: '' })
+    const [registerInfo, setRegisterInfo] = useState({ name: '', email: '', password: '' })
+    const [isRegistering, setIsRegistering] = useState(false)
     const [bioDataSubmitted, setBioDataSubmitted] = useState(false)
 
     useEffect(() => {
@@ -64,6 +65,13 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
                 const statusRes = await fetch(`/api/tests/${testId}/start`)
                 if (statusRes.status === 200) {
                     const submission = await statusRes.json()
+
+                    if (submission.status === 'COMPLETED') {
+                        alert("You have already completed this test.")
+                        router.push('/dashboard')
+                        return
+                    }
+
                     setSubmissionId(submission.id)
                     setBioDataSubmitted(true)
 
@@ -179,9 +187,9 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
     const handleBioDataSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        // Validate Guest Info
-        if (!session && (!guestInfo.name || !guestInfo.email)) {
-            alert("Name and Email are required")
+        // Validate Registration Info
+        if (!session && (!registerInfo.name || !registerInfo.email || !registerInfo.password)) {
+            alert("Name, Email, and Password are required")
             return
         }
 
@@ -195,11 +203,41 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
         }
 
         try {
+            // Handle Registration if not logged in
+            if (!session) {
+                setIsRegistering(true)
+                const regRes = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(registerInfo)
+                })
+
+                if (!regRes.ok) {
+                    const msg = await regRes.text()
+                    throw new Error(msg || "Registration failed")
+                }
+
+                // Auto-login
+                const loginRes = await signIn('credentials', {
+                    redirect: false,
+                    email: registerInfo.email,
+                    password: registerInfo.password
+                })
+
+                if (loginRes?.error) {
+                    throw new Error("Login failed after registration")
+                }
+
+                // Reload page to refresh session and start test
+                window.location.reload()
+                return
+            }
+
             // Start the test session on the server
             const res = await fetch(`/api/tests/${testId}/start`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ bioData, guestInfo })
+                body: JSON.stringify({ bioData }) // No guestInfo needed anymore
             })
 
             if (!res.ok) {
@@ -223,6 +261,7 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
         } catch (error) {
             console.error("Failed to start test", error)
             alert(error instanceof Error ? error.message : "Failed to start test")
+            setIsRegistering(false)
         }
     }
 
@@ -284,40 +323,66 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
                 <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
                     <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
                         <form className="space-y-6" onSubmit={handleBioDataSubmit}>
-                            {/* Guest Info Fields */}
+                            {/* Registration Fields */}
                             {!session && (
                                 <>
-                                    <div>
-                                        <label htmlFor="guestName" className="block text-sm font-medium text-gray-700">
-                                            Full Name <span className="text-red-500">*</span>
-                                        </label>
-                                        <div className="mt-1">
-                                            <input
-                                                id="guestName"
-                                                type="text"
-                                                required
-                                                value={guestInfo.name}
-                                                onChange={(e) => setGuestInfo({ ...guestInfo, name: e.target.value })}
-                                                className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                                            />
+                                    <div className="bg-indigo-50 p-4 rounded-md mb-6">
+                                        <h3 className="text-sm font-medium text-indigo-800 mb-2">Quick Registration</h3>
+                                        <p className="text-xs text-indigo-600 mb-4">Create an account to start the test. You'll be able to access your results later.</p>
+
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label htmlFor="regName" className="block text-sm font-medium text-gray-700">
+                                                    Full Name <span className="text-red-500">*</span>
+                                                </label>
+                                                <div className="mt-1">
+                                                    <input
+                                                        id="regName"
+                                                        type="text"
+                                                        required
+                                                        value={registerInfo.name}
+                                                        onChange={(e) => setRegisterInfo({ ...registerInfo, name: e.target.value })}
+                                                        className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label htmlFor="regEmail" className="block text-sm font-medium text-gray-700">
+                                                    Email Address <span className="text-red-500">*</span>
+                                                </label>
+                                                <div className="mt-1">
+                                                    <input
+                                                        id="regEmail"
+                                                        type="email"
+                                                        required
+                                                        value={registerInfo.email}
+                                                        onChange={(e) => setRegisterInfo({ ...registerInfo, email: e.target.value })}
+                                                        className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label htmlFor="regPassword" className="block text-sm font-medium text-gray-700">
+                                                    Password <span className="text-red-500">*</span>
+                                                </label>
+                                                <div className="mt-1">
+                                                    <input
+                                                        id="regPassword"
+                                                        type="password"
+                                                        required
+                                                        value={registerInfo.password}
+                                                        onChange={(e) => setRegisterInfo({ ...registerInfo, password: e.target.value })}
+                                                        className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="mt-4 text-xs text-center">
+                                            <a href="/auth/signin" className="text-indigo-600 hover:text-indigo-500">
+                                                Already have an account? Sign in
+                                            </a>
                                         </div>
                                     </div>
-                                    <div>
-                                        <label htmlFor="guestEmail" className="block text-sm font-medium text-gray-700">
-                                            Email Address <span className="text-red-500">*</span>
-                                        </label>
-                                        <div className="mt-1">
-                                            <input
-                                                id="guestEmail"
-                                                type="email"
-                                                required
-                                                value={guestInfo.email}
-                                                onChange={(e) => setGuestInfo({ ...guestInfo, email: e.target.value })}
-                                                className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="border-t border-gray-200 my-4"></div>
                                 </>
                             )}
 
@@ -344,7 +409,7 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
                                     type="submit"
                                     className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                 >
-                                    Start Test
+                                    {isRegistering ? 'Creating Account...' : (session ? 'Start Test' : 'Register & Start Test')}
                                 </button>
                             </div>
                         </form>

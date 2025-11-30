@@ -35,10 +35,28 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         }
     })
 
+    const completedSubmissions = await prisma.submission.findMany({
+        where: {
+            studentId: session.user.id,
+            status: 'COMPLETED'
+        },
+        include: {
+            test: true
+        },
+        orderBy: {
+            endTime: 'desc'
+        }
+    })
+
+    const completedTestIds = completedSubmissions.map(s => s.testId)
+
     const availableTests = await prisma.test.findMany({
         where: {
             published: true,
             archived: false, // Never show archived tests to students
+            id: {
+                notIn: completedTestIds
+            },
             NOT: {
                 creatorId: session.user.id // Don't show own tests in "Available" list
             },
@@ -62,19 +80,6 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         },
         orderBy: {
             createdAt: 'desc'
-        }
-    })
-
-    const completedSubmissions = await prisma.submission.findMany({
-        where: {
-            studentId: session.user.id,
-            status: 'COMPLETED'
-        },
-        include: {
-            test: true
-        },
-        orderBy: {
-            endTime: 'desc'
         }
     })
 
