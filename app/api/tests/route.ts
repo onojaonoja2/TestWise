@@ -16,7 +16,7 @@ export async function POST(req: Request) {
 
     try {
         const body = await req.json()
-        const { title, description, duration, questions, bioDataFields, visibility, allowedEmails } = body
+        const { title, description, duration, questions, bioDataFields, visibility, allowedEmails, targetRole } = body
 
         if (!title || !questions || questions.length === 0) {
             return new NextResponse("Title and at least one question are required", { status: 400 })
@@ -29,6 +29,7 @@ export async function POST(req: Request) {
                 duration: parseInt(duration),
                 creatorId: session.user.id,
                 visibility: visibility || 'ORGANIZATION',
+                targetRole: (session.user.isSubAdmin || session.user.role === 'ADMIN') ? (targetRole || 'STUDENT') : 'STUDENT',
                 bioDataFields: bioDataFields, // Save bio-data configuration
                 questions: {
                     create: questions.map((q: any) => ({

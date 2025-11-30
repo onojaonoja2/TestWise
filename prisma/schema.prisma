@@ -80,6 +80,7 @@ model Test {
   published   Boolean   @default(false)
   archived      Boolean   @default(false)
   visibility    TestVisibility @default(ORGANIZATION)
+  targetRole    TargetRole     @default(STUDENT)
   bioDataFields Json?     // Stores the configuration of fields to collect
   creatorId     String
   creator     User      @relation("CreatedTests", fields: [creatorId], references: [id])
@@ -95,6 +96,12 @@ enum TestVisibility {
   PUBLIC
   ORGANIZATION
   WHITELIST
+}
+
+enum TargetRole {
+  STUDENT
+  TEACHER
+  ALL
 }
 
 model TestAllowedUser {

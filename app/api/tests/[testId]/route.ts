@@ -98,7 +98,8 @@ export async function PATCH(
             visibility,
             allowedEmails,
             questions,
-            bioDataFields
+            bioDataFields,
+            targetRole
         } = body
 
         const test = await prisma.test.findUnique({
@@ -131,6 +132,7 @@ export async function PATCH(
                 description !== undefined ||
                 duration !== undefined ||
                 visibility !== undefined ||
+                targetRole !== undefined ||
                 allowedEmails !== undefined ||
                 questions !== undefined ||
                 bioDataFields !== undefined
@@ -152,6 +154,7 @@ export async function PATCH(
                     published,
                     archived,
                     visibility,
+                    targetRole: (session.user.isSubAdmin || session.user.role === 'ADMIN') ? targetRole : undefined, // Only allow update if privileged
                     bioDataFields
                 }
             })

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import BackButton from '@/app/components/BackButton'
 
 interface QuestionDraft {
@@ -20,10 +21,12 @@ interface BioDataField {
 
 export default function CreateTestPage() {
     const router = useRouter()
+    const { data: session } = useSession()
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
     const [duration, setDuration] = useState(60)
     const [visibility, setVisibility] = useState('ORGANIZATION')
+    const [targetRole, setTargetRole] = useState('STUDENT')
     const [allowedEmails, setAllowedEmails] = useState('')
     const [questions, setQuestions] = useState<QuestionDraft[]>([])
     const [bioDataFields, setBioDataFields] = useState<BioDataField[]>([])
@@ -101,7 +104,8 @@ export default function CreateTestPage() {
                     description,
                     duration,
                     visibility,
-                    allowedEmails: emailList,
+                    targetRole,
+                    allowedEmails: visibility === 'WHITELIST' ? emailList : undefined,
                     questions,
                     bioDataFields
                 })
@@ -212,6 +216,28 @@ export default function CreateTestPage() {
                                     {visibility === 'WHITELIST' && "Only users with the specified emails can take this test."}
                                 </p>
                             </div>
+
+                            {/* Target Audience - Only for Sub-Admins/Admins */}
+                            {(session?.user?.isSubAdmin || session?.user?.role === 'ADMIN') && (
+                                <div className="col-span-full">
+                                    <label htmlFor="targetRole" className="block text-sm font-medium leading-6 text-gray-900">
+                                        Target Audience
+                                    </label>
+                                    <div className="mt-2">
+                                        <select
+                                            id="targetRole"
+                                            value={targetRole}
+                                            onChange={(e) => setTargetRole(e.target.value)}
+                                            className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                        >
+                                            <option value="STUDENT">Students Only</option>
+                                            <option value="TEACHER">Teachers Only</option>
+                                            <option value="ALL">Both (Students & Teachers)</option>
+                                        </select>
+                                    </div>
+                                    <p className="mt-1 text-sm text-gray-500">Who can see and take this test within the organization.</p>
+                                </div>
+                            )}
 
                             {visibility === 'WHITELIST' && (
                                 <div className="col-span-full">
@@ -467,7 +493,7 @@ export default function CreateTestPage() {
                         </button>
                     </div>
                 </form>
-            </div >
-        </div >
+            </div>
+        </div>
     )
 }

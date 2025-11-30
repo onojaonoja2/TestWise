@@ -50,6 +50,13 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
 
     const completedTestIds = completedSubmissions.map(s => s.testId)
 
+    // Determine target role filter based on user role
+    // Students see STUDENT/ALL, Teachers see TEACHER/ALL (if they want to take tests)
+    // Note: We cast to any because TargetRole enum might not be fully typed in IDE yet
+    const targetRoleFilter = session.user.role === 'STUDENT'
+        ? ['STUDENT', 'ALL']
+        : ['TEACHER', 'ALL']
+
     const availableTests = await prisma.test.findMany({
         where: {
             published: true,
@@ -61,11 +68,14 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                 creatorId: session.user.id // Don't show own tests in "Available" list
             },
             OR: [
-                { visibility: 'PUBLIC' },
+                // Public tests removed from dashboard list (only accessible via link)
                 {
                     visibility: 'ORGANIZATION',
                     creator: {
                         organizationId: session.user.organizationId
+                    },
+                    targetRole: {
+                        in: targetRoleFilter as any // Cast to avoid temporary type errors
                     }
                 },
                 {
