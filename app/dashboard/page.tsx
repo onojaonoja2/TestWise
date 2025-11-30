@@ -35,10 +35,9 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         }
     })
 
-    const completedSubmissions = await prisma.submission.findMany({
+    const allSubmissions = await prisma.submission.findMany({
         where: {
-            studentId: session.user.id,
-            status: 'COMPLETED'
+            studentId: session.user.id
         },
         include: {
             test: true
@@ -48,7 +47,9 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         }
     })
 
+    const completedSubmissions = allSubmissions.filter(s => s.status === 'COMPLETED')
     const completedTestIds = completedSubmissions.map(s => s.testId)
+    const startedTestIds = allSubmissions.map(s => s.testId)
 
     // Determine target role filter based on user role
     // Students see STUDENT/ALL, Teachers see TEACHER/ALL (if they want to take tests)
@@ -68,16 +69,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                 creatorId: session.user.id // Don't show own tests in "Available" list
             },
             OR: [
-                // Public tests removed from dashboard list (only accessible via link)
-                {
-                    visibility: 'ORGANIZATION',
-                    creator: {
-                        organizationId: session.user.organizationId
-                    },
-                    targetRole: {
-                        in: targetRoleFilter as any // Cast to avoid temporary type errors
-                    }
-                },
+                // 1. Whitelisted tests (Always visible to allowed users)
                 {
                     visibility: 'WHITELIST',
                     allowedUsers: {
@@ -85,6 +77,18 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                             email: session.user.email || undefined
                         }
                     }
+                },
+                // 2. Organization tests (Visible based on role)
+                // Students: Only see if they have ALREADY STARTED the test (e.g. via public link)
+                // Teachers/Admins: See all organization tests targeting them
+                session.user.role === 'STUDENT' ? {
+                    id: { in: startedTestIds }, // Only show if started
+                    visibility: 'ORGANIZATION',
+                    creator: { organizationId: session.user.organizationId }
+                } : {
+                    visibility: 'ORGANIZATION',
+                    creator: { organizationId: session.user.organizationId },
+                    targetRole: { in: targetRoleFilter as any }
                 }
             ]
         },
