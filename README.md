@@ -113,6 +113,27 @@ TestWise is a comprehensive, modern Exam Management System built with Next.js 14
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+## 🚀 Deployment
+
+### Deploy to Vercel
+
+1.  **Push to GitHub**: Ensure your project is pushed to a GitHub repository.
+2.  **Import Project**: Go to [Vercel](https://vercel.com/), click "Add New...", and select "Project". Import your GitHub repository.
+3.  **Environment Variables**: In the Vercel project settings, add the following environment variables:
+    -   `DATABASE_URL`: Your Aiven Postgres connection string (e.g., `postgres://user:password@host:port/defaultdb?sslmode=require`).
+    -   `NEXTAUTH_URL`: Your Vercel deployment URL (e.g., `https://your-project.vercel.app`).
+    -   `NEXTAUTH_SECRET`: A strong random string (generate one with `openssl rand -base64 32`).
+4.  **Deploy**: Click "Deploy". Vercel will build and deploy your application.
+
+### Database Setup (Aiven)
+
+1.  **Create Service**: Create a PostgreSQL service on [Aiven](https://aiven.io/).
+2.  **Get Connection String**: Copy the "Service URI" from the Aiven console.
+3.  **Update Schema**: Run the following command locally to push your schema to the Aiven database (ensure `.env` has the Aiven URL):
+    ```bash
+    npx prisma db push
+    ```
+
 ## 📄 License
 
 This project is licensed under the MIT License.

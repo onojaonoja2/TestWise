@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { ArrowLeft, Plus, UserPlus } from 'lucide-react'
+import { ArrowLeft, Plus } from 'lucide-react'
 
 interface Student {
     name: string
@@ -15,6 +15,7 @@ export default function GroupDetailsPage() {
     const params = useParams()
     const groupId = params.groupId as string
     const [students, setStudents] = useState<Student[]>([]) // List of students to add
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [loading, setLoading] = useState(false)
     const [adding, setAdding] = useState(false)
 
@@ -55,7 +56,8 @@ export default function GroupDetailsPage() {
                 setStudents([])
                 // Ideally fetch updated group members here if we were displaying them
             } else {
-                alert('Failed to add students')
+                const msg = await res.text()
+                alert(`Failed to add students: ${msg}`)
             }
         } catch (error) {
             console.error(error)
@@ -77,7 +79,7 @@ export default function GroupDetailsPage() {
                         Add Students to Group
                     </h2>
                     <p className="mt-1 text-sm text-gray-500">
-                        Add students manually. Accounts will be created for them if they don't exist.
+                        Add students manually. Accounts will be created for them if they don&apos;t exist.
                     </p>
                 </div>
 

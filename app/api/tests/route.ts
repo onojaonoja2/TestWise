@@ -32,6 +32,7 @@ export async function POST(req: Request) {
                 targetRole: (session.user.isSubAdmin || session.user.role === 'ADMIN') ? (targetRole || 'STUDENT') : 'STUDENT',
                 bioDataFields: bioDataFields, // Save bio-data configuration
                 questions: {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     create: questions.map((q: any) => ({
                         text: q.text,
                         type: q.type,

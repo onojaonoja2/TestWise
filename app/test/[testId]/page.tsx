@@ -115,6 +115,7 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
             alert("Time's up! Your test is being submitted.")
             handleSubmit(true) // Pass true to skip confirmation
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [timeLeft, submitting])
 
     // Security: Fullscreen & Focus Tracking
@@ -328,7 +329,7 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
                                 <>
                                     <div className="bg-indigo-50 p-4 rounded-md mb-6">
                                         <h3 className="text-sm font-medium text-indigo-800 mb-2">Quick Registration</h3>
-                                        <p className="text-xs text-indigo-600 mb-4">Create an account to start the test. You'll be able to access your results later.</p>
+                                        <p className="text-xs text-indigo-600 mb-4">Create an account to start the test. You&apos;ll be able to access your results later.</p>
 
                                         <div className="space-y-4">
                                             <div>

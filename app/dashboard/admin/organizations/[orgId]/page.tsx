@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, use } from 'react'
-import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Plus, Trash2, Shield, ShieldOff, User as UserIcon } from 'lucide-react'
 import BackButton from '@/app/components/BackButton'
@@ -17,7 +16,6 @@ interface User {
 
 export default function OrganizationDetailsPage({ params }: { params: Promise<{ orgId: string }> }) {
     const { orgId } = use(params)
-    const router = useRouter()
     const { data: session } = useSession()
     const [users, setUsers] = useState<User[]>([])
     const [loading, setLoading] = useState(true)
@@ -25,6 +23,7 @@ export default function OrganizationDetailsPage({ params }: { params: Promise<{ 
     const [creating, setCreating] = useState(false)
 
     const [selectedTeacher, setSelectedTeacher] = useState<User | null>(null)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [teacherTests, setTeacherTests] = useState<any[]>([])
     const [loadingTests, setLoadingTests] = useState(false)
 
@@ -32,6 +31,7 @@ export default function OrganizationDetailsPage({ params }: { params: Promise<{ 
 
     useEffect(() => {
         fetchUsers()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [orgId])
 
     const fetchUsers = async () => {

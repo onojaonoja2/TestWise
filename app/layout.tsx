@@ -6,8 +6,26 @@ import { Providers } from "./providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "TestWise - Smart Exam Management",
-  description: "A secure, intelligent platform for creating, managing, and monitoring online examinations.",
+  title: {
+    default: "TestWise - Smart Exam Management System",
+    template: "%s | TestWise"
+  },
+  description: "A secure, intelligent platform for creating, managing, and monitoring online examinations. Features role-based access, real-time monitoring, and detailed analytics.",
+  keywords: ["exam management", "online testing", "education software", "quiz maker", "student monitoring", "TestWise"],
+  authors: [{ name: "TestWise Team" }],
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://testwise.vercel.app",
+    title: "TestWise - Smart Exam Management",
+    description: "Secure and intelligent online examination platform.",
+    siteName: "TestWise",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TestWise - Smart Exam Management",
+    description: "Secure and intelligent online examination platform.",
+  },
 };
 
 export default function RootLayout({

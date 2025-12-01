@@ -79,13 +79,16 @@ export async function GET(
         // Add rows
         test.submissions.forEach(submission => {
             const bioDataString = submission.bioData
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 ? Object.entries(submission.bioData as Record<string, any>)
                     .map(([key, value]) => `${key}: ${value}`)
                     .join(', ')
                 : 'N/A'
 
             worksheet.addRow({
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 name: submission.student?.name || (submission.guestInfo as any)?.name || 'Unknown',
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 email: submission.student?.email || (submission.guestInfo as any)?.email || 'Unknown',
                 score: submission.score,
                 warnings: submission.currentWarnings,

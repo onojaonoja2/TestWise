@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, use } from 'react'
-import Link from 'next/link'
 import BackButton from '@/app/components/BackButton'
 
 interface ActiveStudent {

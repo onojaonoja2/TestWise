@@ -35,7 +35,7 @@ export default async function ResultPage({ params }: { params: Promise<{ submiss
         return <div>Unauthorized</div>
     }
 
-    const totalPoints = submission.test.questions.reduce((acc: number, q: any) => acc + q.points, 0)
+    const totalPoints = submission.test.questions.reduce((acc: number, q: { points: number }) => acc + q.points, 0)
     const scorePercentage = submission.score ? Math.round((submission.score / totalPoints) * 100) : 0
 
     return (
@@ -90,8 +90,8 @@ export default async function ResultPage({ params }: { params: Promise<{ submiss
                     <div className="mt-8">
                         <h2 className="text-lg font-medium text-gray-900">Question Breakdown</h2>
                         <div className="mt-4 space-y-6">
-                            {submission.test.questions.map((q: any, index: number) => {
-                                const answer = submission.answers.find((a: any) => a.questionId === q.id)
+                            {submission.test.questions.map((q, index) => {
+                                const answer = submission.answers.find((a) => a.questionId === q.id)
                                 const isCorrect = answer?.isCorrect
 
                                 return (

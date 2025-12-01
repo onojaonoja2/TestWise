@@ -106,27 +106,27 @@ export default async function TestResultsPage({ params }: { params: Promise<{ te
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 bg-white">
-                            {test.submissions.map((submission: any) => (
+                            {test.submissions.map((submission) => (
                                 <tr key={submission.id}>
                                     <td className="whitespace-nowrap px-6 py-4">
                                         <div className="flex items-center">
                                             <div className="h-10 w-10 flex-shrink-0">
                                                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gray-500">
                                                     <span className="font-medium leading-none text-white">
-                                                        {submission.student.name?.[0] || submission.student.email[0].toUpperCase()}
+                                                        {submission.student?.name?.[0] || submission.student?.email?.[0]?.toUpperCase() || '?'}
                                                     </span>
                                                 </span>
                                             </div>
                                             <div className="ml-4">
-                                                <div className="text-sm font-medium text-gray-900">{submission.student.name}</div>
-                                                <div className="text-sm text-gray-500">{submission.student.email}</div>
+                                                <div className="text-sm font-medium text-gray-900">{submission.student?.name || 'Unknown Student'}</div>
+                                                <div className="text-sm text-gray-500">{submission.student?.email || 'No Email'}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                                         {submission.bioData ? (
                                             <div className="flex flex-col">
-                                                {Object.entries(submission.bioData as Record<string, any>).map(([key, value]) => (
+                                                {Object.entries(submission.bioData as Record<string, string | number>).map(([key, value]) => (
                                                     <span key={key} className="text-xs">
                                                         <span className="font-semibold">{key}:</span> {value}
                                                     </span>

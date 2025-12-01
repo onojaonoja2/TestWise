@@ -27,6 +27,7 @@ export async function POST(
         }
 
         // Start a transaction to ensure data integrity
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const submission = await prisma.$transaction(async (tx: any) => {
             let totalScore = 0
             const gradedAnswers = []
@@ -34,6 +35,7 @@ export async function POST(
             // Calculate score
             if (answers && typeof answers === 'object') {
                 for (const [questionId, value] of Object.entries(answers)) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     const question = test.questions.find((q: any) => q.id === questionId)
                     if (question) {
                         let isCorrect = false

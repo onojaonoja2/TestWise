@@ -85,11 +85,13 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                     id: { in: startedTestIds }, // Only show if started
                     visibility: 'ORGANIZATION',
                     creator: { organizationId: session.user.organizationId }
-                } : {
+                } : ({
                     visibility: 'ORGANIZATION',
                     creator: { organizationId: session.user.organizationId },
-                    targetRole: { in: targetRoleFilter as any }
-                }
+                    // targetRole not yet in generated types
+                    targetRole: { in: targetRoleFilter }
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                }) as any
             ]
         },
         orderBy: {
@@ -171,7 +173,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                                             {showArchived ? "No archived tests found." : "You haven't created any tests yet."}
                                         </li>
                                     ) : (
-                                        userTests.map((test: any) => (
+                                        userTests.map((test) => (
                                             <li key={test.id}>
                                                 <div className="block hover:bg-gray-50">
                                                     <div className="px-4 py-4 sm:px-6">
@@ -255,7 +257,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                             {availableTests.length === 0 ? (
                                 <p className="text-gray-500 col-span-full">No tests available at the moment.</p>
                             ) : (
-                                availableTests.map((test: any) => (
+                                availableTests.map((test) => (
                                     <div key={test.id} className="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
                                         <div className="min-w-0 flex-1">
                                             <Link href={`/test/${test.id}`} className="focus:outline-none">
@@ -277,7 +279,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                             <h2 className="text-xl font-semibold text-gray-900 mb-4">My Results</h2>
                             <div className="overflow-hidden bg-white shadow sm:rounded-md">
                                 <ul role="list" className="divide-y divide-gray-200">
-                                    {completedSubmissions.map((submission: any) => (
+                                    {completedSubmissions.map((submission) => (
                                         <li key={submission.id}>
                                             <Link href={`/dashboard/results/${submission.id}`} className="block hover:bg-gray-50">
                                                 <div className="px-4 py-4 sm:px-6">

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Plus, User as UserIcon, Edit2, X, Check } from 'lucide-react'
 
@@ -17,17 +16,17 @@ interface User {
 
 export default function OrganizationManagementPage() {
     const { data: session } = useSession()
-    const router = useRouter()
     const [users, setUsers] = useState<User[]>([])
-    const [loading, setLoading] = useState(true)
     const [newUser, setNewUser] = useState({ name: '', email: '', password: '' })
     const [creating, setCreating] = useState(false)
     const [editingId, setEditingId] = useState<string | null>(null)
     const [editForm, setEditForm] = useState({ name: '', email: '' })
 
     const [selectedTeacher, setSelectedTeacher] = useState<User | null>(null)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [teacherTests, setTeacherTests] = useState<any[]>([])
     const [loadingTests, setLoadingTests] = useState(false)
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         if (session?.user?.organizationId) {
@@ -36,6 +35,7 @@ export default function OrganizationManagementPage() {
             // Not in an organization
             setLoading(false)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [session])
 
     const fetchUsers = async () => {
