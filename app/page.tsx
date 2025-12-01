@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
-import { CheckCircle2, ShieldCheck, Zap, BrainCircuit, ArrowRight } from "lucide-react";
+import { CheckCircle2, ShieldCheck, Zap, BrainCircuit, ArrowRight, Mail, MessageCircle } from "lucide-react";
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
@@ -17,20 +17,20 @@ export default async function Home() {
       <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-[#0a0a0a]/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <div className="bg-indigo-600 p-1.5 rounded-lg">
                 <BrainCircuit className="h-6 w-6 text-white" />
               </div>
               <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
                 TestWise
               </span>
-            </div>
+            </Link>
             <div>
               <Link
-                href="/auth/signin"
+                href="#contact"
                 className="text-sm font-medium text-gray-300 hover:text-white transition-colors px-4 py-2 rounded-md hover:bg-white/5"
               >
-                Sign In
+                Contact
               </Link>
               <Link
                 href="/auth/signin"
@@ -127,9 +127,42 @@ export default async function Home() {
         </div>
       </div>
 
+      {/* Contact Section */}
+      <div id="contact" className="py-24 border-t border-white/10 bg-[#0a0a0a]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold mb-12 text-white">Get in Touch</h2>
+          <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
+            <a
+              href="mailto:byteops.digital@gmail.com"
+              className="flex items-center gap-3 px-6 py-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-indigo-500/50 transition-all group"
+            >
+              <div className="bg-indigo-500/10 p-2 rounded-lg group-hover:bg-indigo-500/20 transition-colors">
+                <Mail className="h-6 w-6 text-indigo-400" />
+              </div>
+              <span className="text-gray-300 group-hover:text-white transition-colors">byteops.digital@gmail.com</span>
+            </a>
+
+            <a
+              href="https://wa.me/2347080904982"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-6 py-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-green-500/50 transition-all group"
+            >
+              <div className="bg-green-500/10 p-2 rounded-lg group-hover:bg-green-500/20 transition-colors">
+                <MessageCircle className="h-6 w-6 text-green-400" />
+              </div>
+              <span className="text-gray-300 group-hover:text-white transition-colors">+234 708 090 4982</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* Footer */}
       <footer className="py-12 border-t border-white/10 text-center text-gray-500 text-sm">
-        <p>&copy; {new Date().getFullYear()} TestWise. All rights reserved.</p>
+        <p className="mb-2">&copy; {new Date().getFullYear()} TestWise. All rights reserved.</p>
+        <p className="flex items-center justify-center gap-1">
+          Made with <span className="text-red-500">❤️</span> by ByteOps Digital Systems
+        </p>
       </footer>
     </main>
   );
