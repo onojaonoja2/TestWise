@@ -59,6 +59,10 @@ export async function GET(
             return new NextResponse("Test not available", { status: 403 })
         }
 
+        if (test.archived && !isCreator && !isAdmin) {
+            return new NextResponse("Test has been archived", { status: 410 })
+        }
+
         // If not creator/admin, sanitize
         if (!isCreator && !isAdmin) {
             const sanitizedTest = {

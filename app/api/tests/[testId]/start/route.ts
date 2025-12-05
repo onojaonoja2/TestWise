@@ -24,6 +24,17 @@ export async function POST(
         })
         if (!test) return new NextResponse("Test not found", { status: 404 })
 
+        // Check availability
+        if (!test.published || test.archived) {
+            const isCreator = session?.user?.id === test.creatorId
+            const isAdmin = session?.user?.role === 'ADMIN'
+
+            if (!isCreator && !isAdmin) {
+                if (test.archived) return new NextResponse("Test is archived", { status: 410 })
+                if (!test.published) return new NextResponse("Test is not published", { status: 403 })
+            }
+        }
+
         // Access Control Logic
         if (test.visibility === 'PUBLIC') {
             if (!session && (!guestInfo?.name || !guestInfo?.email)) {
