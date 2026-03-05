@@ -18,27 +18,20 @@ export async function POST(
         const body = await req.json()
         const { warnings } = body
 
-        // Upsert submission to track active status
-        // If submission doesn't exist (student just started), create it with STARTED status
-        // If it exists, update heartbeat and warnings
-        // Find existing active submission
-        const existingSubmission = await prisma.submission.findFirst({
+        // Attempt to update an active submission
+        const updateResult = await prisma.submission.updateMany({
             where: {
                 testId,
                 studentId: session.user.id,
                 status: 'STARTED'
+            },
+            data: {
+                lastHeartbeat: new Date(),
+                currentWarnings: warnings
             }
         })
 
-        if (existingSubmission) {
-            await prisma.submission.update({
-                where: { id: existingSubmission.id },
-                data: {
-                    lastHeartbeat: new Date(),
-                    currentWarnings: warnings
-                }
-            })
-        } else {
+        if (updateResult.count === 0) {
             // Check if already completed to avoid re-opening
             const completedSubmission = await prisma.submission.findFirst({
                 where: {

@@ -26,12 +26,16 @@ export const authOptions: NextAuthOptions = {
                     }
                 })
 
-                if (!user) {
+                console.log("[AUTH DEBUG] User found:", user?.email, "Has password:", !!user?.password)
+
+                if (!user || !user.password) {
+                    console.log("[AUTH DEBUG] User not found or no password")
                     return null
                 }
 
                 // Verify password
-                const isValid = await compare(credentials.password, user.password!)
+                const isValid = await compare(credentials.password, user.password)
+                console.log("[AUTH DEBUG] Password check result:", isValid)
 
                 if (isValid) {
                     return {

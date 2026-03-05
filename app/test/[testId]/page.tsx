@@ -161,7 +161,7 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ warnings })
             }).catch(console.error)
-        }, 5000) // Send heartbeat every 5 seconds
+        }, 30000) // Send heartbeat every 30 seconds
 
         document.addEventListener('visibilitychange', handleVisibilityChange)
         document.addEventListener('contextmenu', preventCopyPaste)

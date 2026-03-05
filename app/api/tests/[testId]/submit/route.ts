@@ -105,14 +105,14 @@ export async function POST(
             })
 
             // Create answer records
-            for (const ans of gradedAnswers) {
-                await tx.answer.create({
-                    data: {
+            if (gradedAnswers.length > 0) {
+                await tx.answer.createMany({
+                    data: gradedAnswers.map(ans => ({
                         submissionId: newSubmission.id,
                         questionId: ans.questionId,
                         value: ans.value,
                         isCorrect: ans.isCorrect
-                    }
+                    }))
                 })
             }
 
