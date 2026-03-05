@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
-import { CheckCircle2, ShieldCheck, Zap, BrainCircuit, ArrowRight, Mail, MessageCircle } from "lucide-react";
+import { CheckCircle2, ShieldCheck, Zap, BrainCircuit, ArrowRight, Mail, MessageCircle, PhoneCall } from "lucide-react";
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
@@ -131,27 +131,37 @@ export default async function Home() {
       <div id="contact" className="py-24 border-t border-white/10 bg-[#0a0a0a]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-12 text-white">Get in Touch</h2>
-          <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center flex-wrap">
             <a
-              href="mailto:byteops.digital@gmail.com"
-              className="flex items-center gap-3 px-6 py-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-indigo-500/50 transition-all group"
+              href="mailto:info@byteops.digital"
+              className="flex flex-1 min-w-[280px] max-w-sm items-center gap-3 px-6 py-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-indigo-500/50 transition-all group"
             >
               <div className="bg-indigo-500/10 p-2 rounded-lg group-hover:bg-indigo-500/20 transition-colors">
                 <Mail className="h-6 w-6 text-indigo-400" />
               </div>
-              <span className="text-gray-300 group-hover:text-white transition-colors">byteops.digital@gmail.com</span>
+              <span className="text-gray-300 group-hover:text-white transition-colors">info@byteops.digital</span>
             </a>
 
             <a
-              href="https://wa.me/2347080904982"
+              href="https://wa.me/2347019091481"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 px-6 py-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-green-500/50 transition-all group"
+              className="flex flex-1 min-w-[280px] max-w-sm items-center gap-3 px-6 py-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-green-500/50 transition-all group"
             >
               <div className="bg-green-500/10 p-2 rounded-lg group-hover:bg-green-500/20 transition-colors">
                 <MessageCircle className="h-6 w-6 text-green-400" />
               </div>
-              <span className="text-gray-300 group-hover:text-white transition-colors">+234 708 090 4982</span>
+              <span className="text-gray-300 group-hover:text-white transition-colors">+234 701 909 1481</span>
+            </a>
+
+            <a
+              href="tel:+2347047123311"
+              className="flex flex-1 min-w-[280px] max-w-sm items-center gap-3 px-6 py-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-blue-500/50 transition-all group"
+            >
+              <div className="bg-blue-500/10 p-2 rounded-lg group-hover:bg-blue-500/20 transition-colors">
+                <PhoneCall className="h-6 w-6 text-blue-400" />
+              </div>
+              <span className="text-gray-300 group-hover:text-white transition-colors">+234 704 712 3311</span>
             </a>
           </div>
         </div>
