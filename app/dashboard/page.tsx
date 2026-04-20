@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 import TestManagementButtons from "./components/TestManagementButtons"
+import { CheckCircle, Clock, FileText, LayoutDashboard, Plus, Users } from "lucide-react"
 
 export default async function Dashboard({ searchParams }: { searchParams: Promise<{ view?: string }> }) {
     const session = await getServerSession(authOptions)
@@ -13,7 +14,6 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         redirect("/auth/signin")
     }
 
-    // Redirect Global Admins to Admin Dashboard
     if (session.user.role === 'ADMIN') {
         redirect("/dashboard/admin")
     }
@@ -51,9 +51,6 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
     const completedTestIds = completedSubmissions.map(s => s.testId)
     const startedTestIds = allSubmissions.map(s => s.testId)
 
-    // Determine target role filter based on user role
-    // Students see STUDENT/ALL, Teachers see TEACHER/ALL (if they want to take tests)
-    // Note: We cast to any because TargetRole enum might not be fully typed in IDE yet
     const targetRoleFilter = session.user.role === 'STUDENT'
         ? ['STUDENT', 'ALL']
         : ['TEACHER', 'ALL']
@@ -61,15 +58,14 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
     const availableTests = await prisma.test.findMany({
         where: {
             published: true,
-            archived: false, // Never show archived tests to students
+            archived: false,
             id: {
                 notIn: completedTestIds
             },
             NOT: {
-                creatorId: session.user.id // Don't show own tests in "Available" list
+                creatorId: session.user.id
             },
             OR: [
-                // 1. Whitelisted tests (Always visible to allowed users)
                 {
                     visibility: 'WHITELIST',
                     allowedUsers: {
@@ -78,17 +74,13 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                         }
                     }
                 },
-                // 2. Organization tests (Visible based on role)
-                // Students: Only see if they have ALREADY STARTED the test (e.g. via public link)
-                // Teachers/Admins: See all organization tests targeting them
                 session.user.role === 'STUDENT' ? {
-                    id: { in: startedTestIds }, // Only show if started
+                    id: { in: startedTestIds },
                     visibility: 'ORGANIZATION',
                     creator: { organizationId: session.user.organizationId }
                 } : ({
                     visibility: 'ORGANIZATION',
                     creator: { organizationId: session.user.organizationId },
-                    // targetRole not yet in generated types
                     targetRole: { in: targetRoleFilter }
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 }) as any
@@ -99,216 +91,252 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         }
     })
 
+    const isTeacher = session.user.role === 'TEACHER' || session.user.role === 'ADMIN'
+    const totalSubmissionsToTests = isTeacher ? userTests.reduce((acc, test) => acc + test._count.submissions, 0) : 0
+
     return (
-        <div className="min-h-screen bg-gray-100">
-            <nav className="bg-white shadow">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="flex h-16 justify-between">
-                        <div className="flex">
-                            <div className="flex flex-shrink-0 items-center">
-                                <span className="text-xl font-bold text-indigo-600">TestWise</span>
+        <div className="space-y-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">Dashboard</h1>
+                {isTeacher && (
+                    <div className="flex bg-white p-1 rounded-md shadow-sm border border-gray-200">
+                        <Link
+                            href="/dashboard"
+                            className={`px-4 py-2 text-sm font-medium rounded-md ${!showArchived ? 'bg-indigo-50 text-indigo-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
+                        >
+                            Active
+                        </Link>
+                        <Link
+                            href="/dashboard?view=archived"
+                            className={`px-4 py-2 text-sm font-medium rounded-md ${showArchived ? 'bg-indigo-50 text-indigo-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
+                        >
+                            Archived
+                        </Link>
+                    </div>
+                )}
+            </div>
+
+            {/* Metric Cards */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {isTeacher ? (
+                    <>
+                        <div className="bg-white overflow-hidden shadow rounded-lg border border-gray-100 flex items-center p-5">
+                            <div className="rounded-md bg-indigo-50 p-3">
+                                <FileText className="h-6 w-6 text-indigo-600" aria-hidden="true" />
+                            </div>
+                            <div className="ml-5 w-0 flex-1">
+                                <dt className="truncate text-sm font-medium text-gray-500">My Tests</dt>
+                                <dd className="text-2xl font-semibold text-gray-900">{userTests.length}</dd>
                             </div>
                         </div>
-                        <div className="flex items-center">
-                            <span className="text-gray-700 mr-4">Welcome, {session.user.name || session.user.email}</span>
-                            <Link
-                                href="/api/auth/signout"
-                                className="text-sm font-medium text-gray-500 hover:text-gray-700"
-                            >
-                                Sign out
-                            </Link>
+                        <div className="bg-white overflow-hidden shadow rounded-lg border border-gray-100 flex items-center p-5">
+                            <div className="rounded-md bg-green-50 p-3">
+                                <CheckCircle className="h-6 w-6 text-green-600" aria-hidden="true" />
+                            </div>
+                            <div className="ml-5 w-0 flex-1">
+                                <dt className="truncate text-sm font-medium text-gray-500">Total Submissions</dt>
+                                <dd className="text-2xl font-semibold text-gray-900">{totalSubmissionsToTests}</dd>
+                            </div>
                         </div>
+                        <div className="bg-white overflow-hidden shadow rounded-lg border border-gray-100 flex items-center p-5">
+                            <div className="rounded-md bg-blue-50 p-3">
+                                <LayoutDashboard className="h-6 w-6 text-blue-600" aria-hidden="true" />
+                            </div>
+                            <div className="ml-5 w-0 flex-1">
+                                <dt className="truncate text-sm font-medium text-gray-500">Published Tests</dt>
+                                <dd className="text-2xl font-semibold text-gray-900">{userTests.filter(t => t.published).length}</dd>
+                            </div>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <div className="bg-white overflow-hidden shadow rounded-lg border border-gray-100 flex items-center p-5">
+                            <div className="rounded-md bg-blue-50 p-3">
+                                <FileText className="h-6 w-6 text-blue-600" aria-hidden="true" />
+                            </div>
+                            <div className="ml-5 w-0 flex-1">
+                                <dt className="truncate text-sm font-medium text-gray-500">Available Tests</dt>
+                                <dd className="text-2xl font-semibold text-gray-900">{availableTests.length}</dd>
+                            </div>
+                        </div>
+                        <div className="bg-white overflow-hidden shadow rounded-lg border border-gray-100 flex items-center p-5">
+                            <div className="rounded-md bg-green-50 p-3">
+                                <CheckCircle className="h-6 w-6 text-green-600" aria-hidden="true" />
+                            </div>
+                            <div className="ml-5 w-0 flex-1">
+                                <dt className="truncate text-sm font-medium text-gray-500">Tests Completed</dt>
+                                <dd className="text-2xl font-semibold text-gray-900">{completedSubmissions.length}</dd>
+                            </div>
+                        </div>
+                    </>
+                )}
+            </div>
+
+            {/* Teacher Section: My Created Tests */}
+            {isTeacher && (
+                <div>
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-medium text-gray-900">
+                            {showArchived ? "My Archived Tests" : "My Created Tests"}
+                        </h2>
+                        <Link
+                            href="/dashboard/create"
+                            className="inline-flex items-center gap-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-all duration-200"
+                        >
+                            <Plus className="h-4 w-4" />
+                            Create Test
+                        </Link>
                     </div>
-                </div>
-            </nav>
 
-            <main className="py-10">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-
-                    {/* Action Bar */}
-                    <div className="mb-8 flex justify-between items-center">
-                        <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900">Dashboard</h1>
-                        {(session.user.role === 'TEACHER' || session.user.role === 'ADMIN') && (
-                            <div className="flex space-x-4">
-                                {session.user.isSubAdmin && (
-                                    <Link
-                                        href="/dashboard/organization"
-                                        className="text-sm font-medium text-indigo-600 hover:text-indigo-500 flex items-center"
-                                    >
-                                        Manage Organization
-                                    </Link>
-                                )}
-                                <Link
-                                    href={showArchived ? "/dashboard" : "/dashboard?view=archived"}
-                                    className="text-sm font-medium text-indigo-600 hover:text-indigo-500 flex items-center"
-                                >
-                                    {showArchived ? "View Active Tests" : "View Archived Tests"}
-                                </Link>
-                                <Link
-                                    href="/dashboard/groups"
-                                    className="text-sm font-medium text-indigo-600 hover:text-indigo-500 flex items-center"
-                                >
-                                    Manage Groups
-                                </Link>
+                    {userTests.length === 0 ? (
+                        <div className="text-center rounded-lg border-2 border-dashed border-gray-300 p-12">
+                            <FileText className="mx-auto h-12 w-12 text-gray-300" />
+                            <h3 className="mt-2 text-sm font-semibold text-gray-900">No tests</h3>
+                            <p className="mt-1 text-sm text-gray-500">Get started by creating a new test.</p>
+                            <div className="mt-6">
                                 <Link
                                     href="/dashboard/create"
-                                    className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                    className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-all duration-200"
                                 >
-                                    Create New Test
+                                    <Plus className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
+                                    New Test
                                 </Link>
                             </div>
-                        )}
-                    </div>
-
-                    {/* Teacher Section: My Created Tests */}
-                    {(session.user.role === 'TEACHER' || session.user.role === 'ADMIN') && (
-                        <div className="mb-12">
-                            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                                {showArchived ? "My Archived Tests" : "My Created Tests"}
-                            </h2>
-                            <div className="overflow-hidden bg-white shadow sm:rounded-md">
-                                <ul role="list" className="divide-y divide-gray-200">
-                                    {userTests.length === 0 ? (
-                                        <li className="px-4 py-4 sm:px-6 text-gray-500">
-                                            {showArchived ? "No archived tests found." : "You haven't created any tests yet."}
-                                        </li>
-                                    ) : (
-                                        userTests.map((test) => (
-                                            <li key={test.id}>
-                                                <div className="block hover:bg-gray-50">
-                                                    <div className="px-4 py-4 sm:px-6">
-                                                        <div className="flex items-center justify-between">
-                                                            <p className="truncate text-sm font-medium text-indigo-600">{test.title}</p>
-                                                            <div className="ml-2 flex flex-shrink-0 space-x-2">
-                                                                <p className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${test.published ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                                                                    {test.published ? 'Published' : 'Draft'}
-                                                                </p>
-                                                                {test.archived && (
-                                                                    <p className="inline-flex rounded-full bg-gray-100 px-2 text-xs font-semibold leading-5 text-gray-800">
-                                                                        Archived
-                                                                    </p>
-                                                                )}
-                                                                {test.visibility === 'PUBLIC' && (
-                                                                    <p className="inline-flex rounded-full bg-blue-100 px-2 text-xs font-semibold leading-5 text-blue-800">
-                                                                        Public
-                                                                    </p>
-                                                                )}
-                                                                {test.visibility === 'ORGANIZATION' && (
-                                                                    <p className="inline-flex rounded-full bg-purple-100 px-2 text-xs font-semibold leading-5 text-purple-800">
-                                                                        Org Only
-                                                                    </p>
-                                                                )}
-                                                                {test.visibility === 'WHITELIST' && (
-                                                                    <p className="inline-flex rounded-full bg-orange-100 px-2 text-xs font-semibold leading-5 text-orange-800">
-                                                                        Whitelist
-                                                                    </p>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                        <div className="mt-2 sm:flex sm:justify-between">
-                                                            <div className="sm:flex">
-                                                                <p className="flex items-center text-sm text-gray-500">
-                                                                    {test.description}
-                                                                </p>
-                                                            </div>
-                                                            <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                                                                <p className="mr-4">
-                                                                    {test._count.submissions} submissions
-                                                                </p>
-                                                                <div className="flex space-x-2 items-center">
-                                                                    <Link
-                                                                        href={`/dashboard/test/${test.id}/monitor`}
-                                                                        className="text-indigo-600 hover:text-indigo-900 font-medium"
-                                                                    >
-                                                                        Monitor
-                                                                    </Link>
-                                                                    <span className="text-gray-300">|</span>
-                                                                    <Link
-                                                                        href={`/dashboard/test/${test.id}/results`}
-                                                                        className="text-indigo-600 hover:text-indigo-900 font-medium"
-                                                                    >
-                                                                        Results
-                                                                    </Link>
-                                                                    <span className="text-gray-300">|</span>
-                                                                    <TestManagementButtons
-                                                                        testId={test.id}
-                                                                        published={test.published}
-                                                                        archived={test.archived}
-                                                                        visibility={test.visibility}
-                                                                        submissionCount={test._count.submissions}
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                        ))
-                                    )}
-                                </ul>
-                            </div>
                         </div>
-                    )}
-
-                    {/* Student Section: Available Tests */}
-                    <div className="mb-12">
-                        <h2 className="text-xl font-semibold text-gray-900 mb-4">Available Tests</h2>
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                            {availableTests.length === 0 ? (
-                                <p className="text-gray-500 col-span-full">No tests available at the moment.</p>
-                            ) : (
-                                availableTests.map((test) => (
-                                    <div key={test.id} className="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
-                                        <div className="min-w-0 flex-1">
-                                            <Link href={`/test/${test.id}`} className="focus:outline-none">
-                                                <span className="absolute inset-0" aria-hidden="true" />
-                                                <p className="text-sm font-medium text-gray-900">{test.title}</p>
-                                                <p className="truncate text-sm text-gray-500">{test.description}</p>
-                                                <p className="mt-1 text-xs text-gray-400">{test.duration} mins</p>
-                                            </Link>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                            {userTests.map((test) => (
+                                <div key={test.id} className="relative flex flex-col justify-between overflow-hidden rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:shadow-md hover:border-indigo-200">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="flex-1 min-w-0 pr-4">
+                                            <h3 className="text-lg font-semibold leading-tight text-gray-900 truncate">
+                                                {test.title}
+                                            </h3>
+                                            <p className="text-sm text-gray-500 line-clamp-2 mt-1">
+                                                {test.description || "No description provided"}
+                                            </p>
+                                        </div>
+                                        <div className="flex flex-col gap-1.5 shrink-0 items-end">
+                                            {test.published ? (
+                                                <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Published</span>
+                                            ) : (
+                                                <span className="inline-flex items-center rounded-full bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20">Draft</span>
+                                            )}
                                         </div>
                                     </div>
-                                ))
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Student Section: Completed Tests */}
-                    {completedSubmissions.length > 0 && (
-                        <div>
-                            <h2 className="text-xl font-semibold text-gray-900 mb-4">My Results</h2>
-                            <div className="overflow-hidden bg-white shadow sm:rounded-md">
-                                <ul role="list" className="divide-y divide-gray-200">
-                                    {completedSubmissions.map((submission) => (
-                                        <li key={submission.id}>
-                                            <Link href={`/dashboard/results/${submission.id}`} className="block hover:bg-gray-50">
-                                                <div className="px-4 py-4 sm:px-6">
-                                                    <div className="flex items-center justify-between">
-                                                        <p className="truncate text-sm font-medium text-indigo-600">{submission.test.title}</p>
-                                                        <div className="ml-2 flex flex-shrink-0">
-                                                            <p className="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">
-                                                                Score: {submission.score}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="mt-2 sm:flex sm:justify-between">
-                                                        <div className="sm:flex">
-                                                            <p className="flex items-center text-sm text-gray-500">
-                                                                Submitted on {new Date(submission.endTime || '').toLocaleDateString()}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
+                                    <div className="mt-auto">
+                                        <div className="flex items-center text-sm text-gray-600 mb-4 gap-4 bg-gray-50 rounded-lg p-3">
+                                            <div className="flex items-center gap-1.5">
+                                                <Users className="h-4 w-4 text-gray-400" />
+                                                <span className="font-medium text-gray-900">{test._count.submissions}</span> 
+                                                <span className="text-xs">subs</span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5">
+                                                <Clock className="h-4 w-4 text-gray-400" />
+                                                <span className="font-medium text-gray-900">{test.duration}</span> 
+                                                <span className="text-xs">mins</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                                            <div className="flex space-x-3">
+                                                <Link
+                                                    href={`/dashboard/test/${test.id}/monitor`}
+                                                    className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+                                                >
+                                                    Monitor
+                                                </Link>
+                                                <Link
+                                                    href={`/dashboard/test/${test.id}/results`}
+                                                    className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+                                                >
+                                                    Results
+                                                </Link>
+                                            </div>
+                                            <TestManagementButtons
+                                                testId={test.id}
+                                                published={test.published}
+                                                archived={test.archived}
+                                                visibility={test.visibility}
+                                                submissionCount={test._count.submissions}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     )}
-
                 </div>
-            </main >
-        </div >
+            )}
+
+            {/* Student Section: Available Tests */}
+            <div>
+                <h2 className="text-lg font-medium text-gray-900 mb-4">Available Tests</h2>
+                {availableTests.length === 0 ? (
+                    <div className="text-center rounded-lg border-2 border-dashed border-gray-300 p-8 bg-gray-50">
+                        <p className="text-sm text-gray-500">No tests available right now.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {availableTests.map((test) => (
+                            <Link key={test.id} href={`/test/${test.id}`} className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all hover:shadow-md hover:border-indigo-300 hover:-translate-y-0.5">
+                                <div className="mb-4">
+                                    <h3 className="text-base font-semibold leading-tight text-gray-900 group-hover:text-indigo-600 transition-colors">
+                                        {test.title}
+                                    </h3>
+                                    <p className="text-sm text-gray-500 line-clamp-2 mt-1">
+                                        {test.description}
+                                    </p>
+                                </div>
+                                <div className="mt-auto flex items-center justify-between text-sm text-gray-500 border-t border-gray-50 pt-3">
+                                    <div className="flex items-center gap-1.5">
+                                        <Clock className="h-4 w-4 text-indigo-400" />
+                                        <span>{test.duration} mins</span>
+                                    </div>
+                                    <span className="font-medium text-indigo-600 flex items-center group-hover:translate-x-1 transition-transform">
+                                        Take Test →
+                                    </span>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Student Section: Completed Tests */}
+            {completedSubmissions.length > 0 && (
+                <div>
+                    <h2 className="text-lg font-medium text-gray-900 mb-4">Recent Results</h2>
+                    <div className="overflow-hidden bg-white shadow-sm ring-1 ring-gray-200 sm:rounded-xl">
+                        <ul role="list" className="divide-y divide-gray-100">
+                            {completedSubmissions.map((submission) => (
+                                <li key={submission.id} className="relative flex justify-between gap-x-6 py-5 px-4 sm:px-6 hover:bg-gray-50 transition-colors">
+                                    <div className="flex min-w-0 gap-x-4">
+                                        <div className="min-w-0 flex-auto">
+                                            <p className="text-sm font-semibold leading-6 text-gray-900">
+                                                <Link href={`/dashboard/results/${submission.id}`}>
+                                                    <span className="absolute inset-x-0 -top-px bottom-0" />
+                                                    {submission.test.title}
+                                                </Link>
+                                            </p>
+                                            <p className="mt-1 flex text-xs leading-5 text-gray-500">
+                                                Submitted on {new Date(submission.endTime || '').toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex shrink-0 items-center gap-x-4">
+                                        <div className="flex flex-col items-end">
+                                            <p className="text-sm leading-6 text-gray-900">Score</p>
+                                            <p className="mt-1 text-lg font-bold leading-5 text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-md">
+                                                {submission.score}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            )}
+        </div>
     )
 }
