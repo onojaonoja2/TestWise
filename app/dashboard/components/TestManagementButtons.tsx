@@ -75,63 +75,55 @@ export default function TestManagementButtons({ testId, published, archived, vis
     const isEditable = !published && submissionCount === 0
 
     return (
-        <div className="flex space-x-2 text-sm items-center">
+        <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-2 text-sm">
             {visibility === 'PUBLIC' && (
-                <>
-                    <button
-                        onClick={copyLink}
-                        className="text-indigo-600 hover:text-indigo-900 font-medium"
-                        title="Copy Public Link"
-                    >
-                        Copy Link
-                    </button>
-                    <span className="text-gray-300">|</span>
-                </>
+                <button
+                    onClick={copyLink}
+                    className="text-indigo-600 hover:text-indigo-900 font-medium whitespace-nowrap"
+                    title="Copy Public Link"
+                >
+                    Copy Link
+                </button>
             )}
 
             {isEditable ? (
                 <Link
                     href={`/dashboard/test/${testId}/edit`}
-                    className="text-indigo-600 hover:text-indigo-900 font-medium"
+                    className="text-indigo-600 hover:text-indigo-900 font-medium whitespace-nowrap"
                 >
                     Edit
                 </Link>
             ) : (
-                <span className="text-gray-400 cursor-not-allowed" title="Cannot edit published test or test with submissions">
+                <span className="text-gray-400 cursor-not-allowed whitespace-nowrap" title="Cannot edit published test or test with submissions">
                     Edit
                 </span>
             )}
-            <span className="text-gray-300">|</span>
 
             {!archived && (
-                <>
-                    <button
-                        onClick={() => updateStatus({ published: !published })}
-                        className={`${published ? 'text-yellow-600 hover:text-yellow-900' : 'text-green-600 hover:text-green-900'} font-medium`}
-                    >
-                        {published ? 'Unpublish' : 'Publish'}
-                    </button>
-                    <span className="text-gray-300">|</span>
-                </>
+                <button
+                    onClick={() => updateStatus({ published: !published })}
+                    className={`${published ? 'text-yellow-600 hover:text-yellow-900' : 'text-green-600 hover:text-green-900'} font-medium whitespace-nowrap`}
+                >
+                    {published ? 'Unpublish' : 'Publish'}
+                </button>
             )}
 
             <button
                 onClick={() => updateStatus({ archived: !archived })}
-                className={`${archived ? 'text-blue-600 hover:text-blue-900' : 'text-red-600 hover:text-red-900'} font-medium`}
+                className={`${archived ? 'text-blue-600 hover:text-blue-900' : 'text-red-600 hover:text-red-900'} font-medium whitespace-nowrap`}
             >
                 {archived ? 'Restore' : 'Archive'}
             </button>
 
-            <span className="text-gray-300">|</span>
             {isEditable ? (
                 <button
                     onClick={deleteTest}
-                    className="text-red-600 hover:text-red-900 font-medium"
+                    className="text-red-600 hover:text-red-900 font-medium whitespace-nowrap"
                 >
                     Delete
                 </button>
             ) : (
-                <span className="text-gray-400 cursor-not-allowed" title="Cannot delete published test or test with submissions">
+                <span className="text-gray-400 cursor-not-allowed whitespace-nowrap" title="Cannot delete published test or test with submissions">
                     Delete
                 </span>
             )}
