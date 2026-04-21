@@ -81,7 +81,7 @@ export default async function TestResultsPage({ params }: { params: Promise<{ te
                     </div>
                 </div>
 
-                <div className="overflow-hidden rounded-lg bg-white shadow">
+                <div className="overflow-x-auto rounded-lg bg-white shadow">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>

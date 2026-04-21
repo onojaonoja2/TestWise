@@ -6,25 +6,37 @@ const prisma = new PrismaClient({
 })
 
 async function main() {
-    const password = await hash('Smoot784!38BD', 12)
+    const adminPassword = process.env.ADMIN_SEED_PASSWORD
 
-    // Specific Admin User for Production
+    if (!adminPassword) {
+        console.error('ERROR: ADMIN_SEED_PASSWORD environment variable is required')
+        console.error('Set it before running: export ADMIN_SEED_PASSWORD="your-secure-password"')
+        process.exit(1)
+    }
+
+    if (adminPassword.length < 8) {
+        console.error('ERROR: Password must be at least 8 characters')
+        process.exit(1)
+    }
+
+    const hashedPassword = await hash(adminPassword, 12)
+
     const admin = await prisma.user.upsert({
         where: { email: 'adminsamuel@testwise.com' },
         update: {
-            password, // Ensure password is correct
-            role: 'ADMIN', // Ensure role is ADMIN
-            name: 'Admin Samuel' // Set a default name
+            password: hashedPassword,
+            role: 'ADMIN',
+            name: 'Admin Samuel'
         },
         create: {
             email: 'adminsamuel@testwise.com',
             name: 'Admin Samuel',
-            password,
+            password: hashedPassword,
             role: 'ADMIN',
         },
     })
 
-    console.log('Production Admin created:', admin)
+    console.log('Production Admin created/updated:', admin.email)
 }
 
 main()

@@ -1,18 +1,42 @@
 import { withAuth } from "next-auth/middleware"
-import { NextResponse } from "next/server"
+import { NextResponse, NextRequest } from "next/server"
+
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
+
+const RateLimitWindowMs = 15 * 60 * 1000
+const MaxRequestsPerWindow = 10
+
+function checkRateLimit(ip: string): boolean {
+    const now = Date.now()
+    const record = rateLimitMap.get(ip)
+
+    if (!record || now > record.resetTime) {
+        rateLimitMap.set(ip, { count: 1, resetTime: now + RateLimitWindowMs })
+        return true
+    }
+
+    if (record.count >= MaxRequestsPerWindow) {
+        return false
+    }
+
+    record.count++
+    return true
+}
+
+function getClientIP(req: NextRequest): string {
+    const forwarded = req.headers.get("x-forwarded-for")
+    return forwarded ? forwarded.split(",")[0].trim() : req.ip ?? "unknown"
+}
 
 export default withAuth(
     function middleware(req) {
-        // Custom logic if needed, e.g. role-based access control
         const token = req.nextauth.token
         const path = req.nextUrl.pathname
 
-        // Protect admin routes
         if (path.startsWith("/admin") && token?.role !== "ADMIN") {
             return NextResponse.redirect(new URL("/", req.url))
         }
 
-        // Protect teacher routes
         if (path.startsWith("/teacher") && token?.role !== "TEACHER" && token?.role !== "ADMIN") {
             return NextResponse.redirect(new URL("/", req.url))
         }

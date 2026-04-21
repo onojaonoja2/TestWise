@@ -237,8 +237,8 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
                                                 <span className="text-xs">mins</span>
                                             </div>
                                         </div>
-                                        <div className="flex flex-wrap items-center justify-between gap-y-3 pt-4 border-t border-gray-100">
-                                            <div className="flex flex-wrap items-center gap-3 mr-4">
+                                        <div className="space-y-3 pt-4 border-t border-gray-100">
+                                            <div className="flex flex-wrap items-center gap-3">
                                                 <Link
                                                     href={`/dashboard/test/${test.id}/monitor`}
                                                     className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors whitespace-nowrap"

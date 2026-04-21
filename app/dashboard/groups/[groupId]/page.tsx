@@ -157,7 +157,6 @@ export default function GroupDetailsPage() {
                                         <div className="ml-4">
                                             <p className="text-sm font-medium text-gray-900">{student.name || 'No Name'}</p>
                                             <p className="text-sm text-gray-500">{student.email}</p>
-                                            <p className="text-xs text-gray-400">Pass: {student.password}</p>
                                         </div>
                                     </div>
                                     <button

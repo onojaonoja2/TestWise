@@ -75,26 +75,16 @@ export default function TestManagementButtons({ testId, published, archived, vis
     const isEditable = !published && submissionCount === 0
 
     return (
-        <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-2 text-sm">
-            {visibility === 'PUBLIC' && (
-                <button
-                    onClick={copyLink}
-                    className="text-indigo-600 hover:text-indigo-900 font-medium whitespace-nowrap"
-                    title="Copy Public Link"
-                >
-                    Copy Link
-                </button>
-            )}
-
+        <div className="grid grid-cols-2 gap-2 text-sm">
             {isEditable ? (
                 <Link
                     href={`/dashboard/test/${testId}/edit`}
-                    className="text-indigo-600 hover:text-indigo-900 font-medium whitespace-nowrap"
+                    className="px-3 py-1.5 text-center rounded-md border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-indigo-300 font-medium transition-colors"
                 >
                     Edit
                 </Link>
             ) : (
-                <span className="text-gray-400 cursor-not-allowed whitespace-nowrap" title="Cannot edit published test or test with submissions">
+                <span className="px-3 py-1.5 text-center rounded-md border border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed" title="Cannot edit published test or test with submissions">
                     Edit
                 </span>
             )}
@@ -102,7 +92,7 @@ export default function TestManagementButtons({ testId, published, archived, vis
             {!archived && (
                 <button
                     onClick={() => updateStatus({ published: !published })}
-                    className={`${published ? 'text-yellow-600 hover:text-yellow-900' : 'text-green-600 hover:text-green-900'} font-medium whitespace-nowrap`}
+                    className={`px-3 py-1.5 text-center rounded-md border font-medium transition-colors ${published ? 'border-yellow-200 bg-yellow-50 text-yellow-700 hover:bg-yellow-100' : 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100'}`}
                 >
                     {published ? 'Unpublish' : 'Publish'}
                 </button>
@@ -110,7 +100,7 @@ export default function TestManagementButtons({ testId, published, archived, vis
 
             <button
                 onClick={() => updateStatus({ archived: !archived })}
-                className={`${archived ? 'text-blue-600 hover:text-blue-900' : 'text-red-600 hover:text-red-900'} font-medium whitespace-nowrap`}
+                className={`px-3 py-1.5 text-center rounded-md border font-medium transition-colors ${archived ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100' : 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100'}`}
             >
                 {archived ? 'Restore' : 'Archive'}
             </button>
@@ -118,14 +108,24 @@ export default function TestManagementButtons({ testId, published, archived, vis
             {isEditable ? (
                 <button
                     onClick={deleteTest}
-                    className="text-red-600 hover:text-red-900 font-medium whitespace-nowrap"
+                    className="px-3 py-1.5 text-center rounded-md border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 font-medium transition-colors"
                 >
                     Delete
                 </button>
             ) : (
-                <span className="text-gray-400 cursor-not-allowed whitespace-nowrap" title="Cannot delete published test or test with submissions">
+                <span className="px-3 py-1.5 text-center rounded-md border border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed" title="Cannot delete published test or test with submissions">
                     Delete
                 </span>
+            )}
+
+            {visibility === 'PUBLIC' && (
+                <button
+                    onClick={copyLink}
+                    className="px-3 py-1.5 text-center rounded-md border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-medium transition-colors"
+                    title="Copy Public Link"
+                >
+                    Copy Link
+                </button>
             )}
         </div>
     )
