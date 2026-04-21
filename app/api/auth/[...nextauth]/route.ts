@@ -34,7 +34,7 @@ export const authOptions: NextAuthOptions = {
                 }
 
                 if (user.lockedUntil && new Date(user.lockedUntil) > new Date()) {
-                    return new Error("Account temporarily locked due to too many failed login attempts")
+                    throw new Error("Account temporarily locked due to too many failed login attempts")
                 }
 
                 const isValid = await compare(credentials.password, user.password)
