@@ -16,6 +16,18 @@ enum UserRole {
   STUDENT
 }
 
+enum DocumentStatus {
+  PROCESSING
+  READY
+  FAILED
+}
+
+enum GenerationStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
 model User {
   id                   String    @id @default(cuid())
   name                 String?
@@ -43,6 +55,11 @@ model User {
   // Student Groups
   studentGroups     StudentGroupMember[]
   createdGroups     StudentGroup[] @relation("CreatedGroups")
+
+  // Documents & AI Generation
+  documents          Document[]
+  generationSessions GenerationSession[]
+  documentConversations DocumentConversation[]
 }
 
 model Organization {
@@ -171,4 +188,106 @@ model Answer {
   question     Question   @relation(fields: [questionId], references: [id])
   value        String     // The student's answer
   isCorrect    Boolean?   // Null if not yet graded
+}
+
+// ─── AI-Powered Document & Question Generation ───
+
+model Document {
+  id           String         @id @default(cuid())
+  filename     String         // UUID-based name in S3
+  originalName String         // Original uploaded filename
+  mimeType     String
+  size         Int            // Bytes
+  content      String?        // Full extracted text (for LLM-native queries)
+  status       DocumentStatus @default(PROCESSING)
+  userId       String
+  user         User           @relation(fields: [userId], references: [id])
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  chunks       DocumentChunk[]
+  generations  GenerationSession[]
+  conversations DocumentConversation[]
+
+  @@index([userId])
+}
+
+model DocumentChunk {
+  id         String   @id @default(cuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  content    String
+  index      Int      // Order within the document
+  embedding  Unsupported("vector(1536)")?  // pgvector embedding
+
+  @@index([documentId])
+}
+
+model DocumentConversation {
+  id         String   @id @default(cuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  title      String   @default("New Conversation")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  messages DocumentMessage[]
+
+  @@index([documentId])
+  @@index([userId])
+}
+
+model DocumentMessage {
+  id             String               @id @default(cuid())
+  conversationId String
+  conversation   DocumentConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           MessageRole
+  content        String
+  createdAt      DateTime             @default(now())
+
+  @@index([conversationId])
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+}
+
+model GenerationSession {
+  id              String           @id @default(cuid())
+  documentId      String
+  document        Document         @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User             @relation(fields: [userId], references: [id])
+  questionType    QuestionType     @default(MULTIPLE_CHOICE)
+  count           Int              @default(5)
+  difficulty      String           @default("medium")
+  prompt          String?          // Custom instructions from teacher
+  status          GenerationStatus @default(PROCESSING)
+  createdAt       DateTime         @default(now())
+  completedAt     DateTime?
+
+  questions       GeneratedQuestion[]
+
+  @@index([documentId])
+  @@index([userId])
+}
+
+model GeneratedQuestion {
+  id            String           @id @default(cuid())
+  sessionId     String
+  session       GenerationSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  text          String
+  type          QuestionType
+  points        Int              @default(1)
+  options       Json?            // For MCQ: ["Option A", "Option B", ...]
+  correctAnswer String
+  explanation   String?          // Why this is correct
+  sourceChunks  Json?            // References to source chunk indices
+  approved      Boolean?         // null=pending, true=approved, false=rejected
+  feedback      String?          // Teacher feedback on generation
+
+  @@index([sessionId])
 }

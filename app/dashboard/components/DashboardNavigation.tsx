@@ -14,7 +14,8 @@ import {
     LogOut,
     UserCircle,
     Settings,
-    Activity
+    Activity,
+    FileText
 } from 'lucide-react'
 
 type UserSession = {
@@ -37,6 +38,7 @@ export default function DashboardNavigation({ user }: { user: UserSession }) {
 
     if (isTeacherOrAdmin) {
         navigation.push({ name: 'Create Test', href: '/dashboard/create', icon: PlusCircle, current: pathname === '/dashboard/create' })
+        navigation.push({ name: 'Documents', href: '/dashboard/documents', icon: FileText, current: pathname.startsWith('/dashboard/documents') })
         navigation.push({ name: 'Manage Groups', href: '/dashboard/groups', icon: Users, current: pathname.startsWith('/dashboard/groups') })
         
         if (user.isSubAdmin) {
