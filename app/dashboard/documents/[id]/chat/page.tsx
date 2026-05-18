@@ -144,42 +144,75 @@ export default function DocumentChatPage() {
     setInput('')
     setSending(true)
 
-    const tempMessage: Message = {
-      id: `temp-${Date.now()}`,
+    const tempUserMessage: Message = {
+      id: `temp-user-${Date.now()}`,
       role: 'USER',
       content: messageText,
       createdAt: new Date().toISOString(),
     }
-    setMessages(prev => [...prev, tempMessage])
+
+    const tempAssistantMessage: Message = {
+      id: `temp-assistant-${Date.now()}`,
+      role: 'ASSISTANT',
+      content: '',
+      createdAt: new Date().toISOString(),
+    }
+
+    setMessages(prev => [...prev, tempUserMessage, tempAssistantMessage])
 
     try {
-      const res = await fetch(`/api/documents/${params.id}/chat`, {
+      let conversationId = activeConversation?.id
+
+      if (!conversationId) {
+        const createRes = await fetch(`/api/documents/${params.id}/conversations`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: messageText.slice(0, 50) }),
+        })
+        if (createRes.ok) {
+          const newConv = await createRes.json()
+          conversationId = newConv.id
+          setActiveConversation(newConv)
+          setConversations(prev => [newConv, ...prev])
+        }
+      }
+
+      const res = await fetch(`/api/documents/${params.id}/chat/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: messageText,
-          conversationId: activeConversation?.id,
+          conversationId,
         }),
       })
 
       if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to send message')
+        throw new Error('Failed to send message')
       }
 
-      const data = await res.json()
-      
-      if (!activeConversation) {
-        setActiveConversation(data.conversation)
-        setConversations(prev => [data.conversation, ...prev])
+      const reader = res.body?.getReader()
+      if (!reader) throw new Error('No reader available')
+
+      const decoder = new TextDecoder()
+      let done = false
+
+      while (!done) {
+        const { value, done: doneReading } = await reader.read()
+        done = doneReading
+        if (value) {
+          const chunk = decoder.decode(value, { stream: !done })
+          setMessages(prev => prev.map(msg => {
+            if (msg.id === tempAssistantMessage.id) {
+              return { ...msg, content: msg.content + chunk }
+            }
+            return msg
+          }))
+        }
       }
 
-      setMessages(prev => {
-        const filtered = prev.filter(m => !m.id.startsWith('temp-'))
-        return [...filtered, tempMessage, data.message]
-      })
+      await fetchConversations()
     } catch (err) {
-      setMessages(prev => prev.filter(m => m.id !== tempMessage.id))
+      setMessages(prev => prev.filter(m => m.id !== tempUserMessage.id && m.id !== tempAssistantMessage.id))
       setError(err instanceof Error ? err.message : 'Failed to send message')
       setInput(messageText)
     } finally {
@@ -291,7 +324,7 @@ export default function DocumentChatPage() {
                 <h2 className="font-semibold text-gray-900">{activeConversation.title}</h2>
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.length === 0 ? (
+                {messages.length === 0 && !sending ? (
                   <div className="text-center py-12">
                     <MessageSquare className="h-12 w-12 text-gray-300 mx-auto mb-4" />
                     <p className="text-gray-500">
@@ -311,14 +344,12 @@ export default function DocumentChatPage() {
                             : 'bg-gray-100 text-gray-900'
                         }`}
                       >
-                        <p className="whitespace-pre-wrap">{msg.content}</p>
-                        <p
-                          className={`text-xs mt-1 ${
-                            msg.role === 'USER' ? 'text-indigo-200' : 'text-gray-400'
-                          }`}
-                        >
-                          {formatTime(msg.createdAt)}
-                        </p>
+                        <p className="whitespace-pre-wrap">{msg.content || (msg.id.startsWith('temp-assistant') && sending ? 'Typing...' : '')}</p>
+                        {msg.role === 'USER' && (
+                          <p className="text-xs mt-1 text-indigo-200">
+                            {formatTime(msg.createdAt)}
+                          </p>
+                        )}
                       </div>
                     </div>
                   ))

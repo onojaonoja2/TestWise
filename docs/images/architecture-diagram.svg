@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8fafc"/>
+      <stop offset="100%" style="stop-color:#e2e8f0"/>
+    </linearGradient>
+    <linearGradient id="clientGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4f46e5"/>
+      <stop offset="100%" style="stop-color:#4338ca"/>
+    </linearGradient>
+    <linearGradient id="serverGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0891b2"/>
+      <stop offset="100%" style="stop-color:#0e7490"/>
+    </linearGradient>
+    <linearGradient id="dbGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#059669"/>
+      <stop offset="100%" style="stop-color:#047857"/>
+    </linearGradient>
+    <linearGradient id="s3Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ea580c"/>
+      <stop offset="100%" style="stop-color:#c2410c"/>
+    </linearGradient>
+    <linearGradient id="redisGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#dc2626"/>
+      <stop offset="100%" style="stop-color:#b91c1c"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="700" fill="url(#bgGrad)"/>
+  
+  <!-- Title -->
+  <text x="600" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#1e293b">TestWise Architecture</text>
+  <text x="600" y="65" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#64748b">AI-Powered Examination Platform</text>
+  
+  <!-- Client Layer -->
+  <rect x="100" y="100" width="300" height="180" rx="12" fill="#ffffff" stroke="#4f46e5" stroke-width="2"/>
+  <rect x="100" y="100" width="300" height="35" rx="12" fill="url(#clientGrad)"/>
+  <text x="250" y="122" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">Client (Browser)</text>
+  <text x="250" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#475569">Next.js React App</text>
+  <text x="250" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#64748b">Port 3000</text>
+  
+  <rect x="130" y="195" width="140" height="28" rx="6" fill="#eef2ff" stroke="#c7d2fe"/>
+  <text x="200" y="213" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#4338ca">React Components</text>
+  
+  <rect x="130" y="230" width="140" height="28" rx="6" fill="#eef2ff" stroke="#c7d2fe"/>
+  <text x="200" y="248" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#4338ca">Tailwind CSS</text>
+  
+  <rect x="230" y="195" width="140" height="28" rx="6" fill="#eef2ff" stroke="#c7d2fe"/>
+  <text x="300" y="213" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#4338ca">Streaming Chat</text>
+  
+  <rect x="230" y="230" width="140" height="28" rx="6" fill="#eef2ff" stroke="#c7d2fe"/>
+  <text x="300" y="248" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#4338ca">NextAuth Session</text>
+  
+  <!-- Next.js Server Layer -->
+  <rect x="450" y="100" width="300" height="500" rx="12" fill="#ffffff" stroke="#0891b2" stroke-width="2"/>
+  <rect x="450" y="100" width="300" height="35" rx="12" fill="url(#serverGrad)"/>
+  <text x="600" y="122" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">Next.js Server</text>
+  
+  <!-- API Routes -->
+  <rect x="470" y="150" width="260" height="120" rx="8" fill="#ecfeff" stroke="#a5f3fc"/>
+  <text x="600" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#0e7490">API Routes</text>
+  
+  <rect x="485" y="185" width="110" height="24" rx="4" fill="#cffafe"/>
+  <text x="540" y="201" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#0891b2">/api/documents</text>
+  
+  <rect x="485" y="215" width="110" height="24" rx="4" fill="#cffafe"/>
+  <text x="540" y="231" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#0891b2">/api/tests</text>
+  
+  <rect x="605" y="185" width="110" height="24" rx="4" fill="#cffafe"/>
+  <text x="660" y="201" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#0891b2">/api/chat/stream</text>
+  
+  <rect x="605" y="215" width="110" height="24" rx="4" fill="#cffafe"/>
+  <text x="660" y="231" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#0891b2">/api/generate</text>
+  
+  <!-- Pages -->
+  <rect x="470" y="290" width="260" height="120" rx="8" fill="#ecfeff" stroke="#a5f3fc"/>
+  <text x="600" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#0e7490">Pages</text>
+  
+  <rect x="485" y="325" width="110" height="24" rx="4" fill="#cffafe"/>
+  <text x="540" y="341" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#0891b2">/dashboard</text>
+  
+  <rect x="485" y="355" width="110" height="24" rx="4" fill="#cffafe"/>
+  <text x="540" y="371" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#0891b2">/documents/[id]/chat</text>
+  
+  <rect x="605" y="325" width="110" height="24" rx="4" fill="#cffafe"/>
+  <text x="660" y="341" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#0891b2">/test/[id]</text>
+  
+  <rect x="605" y="355" width="110" height="24" rx="4" fill="#cffafe"/>
+  <text x="660" y="371" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#0891b2">/dashboard/create</text>
+  
+  <!-- LLM Integration -->
+  <rect x="470" y="430" width="260" height="50" rx="8" fill="#fef3c7" stroke="#fcd34d"/>
+  <text x="600" y="455" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#92400e">OpenRouter API (LLM)</text>
+  
+  <!-- Worker -->
+  <rect x="470" y="500" width="260" height="50" rx="8" fill="#f3e8ff" stroke="#c4b5fd"/>
+  <text x="600" y="525" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#6b21a8">BullMQ Worker</text>
+  
+  <!-- PostgreSQL -->
+  <rect x="800" y="150" width="280" height="180" rx="12" fill="#ffffff" stroke="#059669" stroke-width="2"/>
+  <rect x="800" y="150" width="280" height="35" rx="12" fill="url(#dbGrad)"/>
+  <text x="940" y="172" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">PostgreSQL</text>
+  <text x="940" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#475569">Prisma ORM</text>
+  
+  <rect x="820" y="230" width="100" height="26" rx="4" fill="#d1fae5"/>
+  <text x="870" y="247" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#047857">Document</text>
+  
+  <rect x="930" y="230" width="100" height="26" rx="4" fill="#d1fae5"/>
+  <text x="980" y="247" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#047857">Test</text>
+  
+  <rect x="820" y="265" width="100" height="26" rx="4" fill="#d1fae5"/>
+  <text x="870" y="282" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#047857">Question</text>
+  
+  <rect x="930" y="265" width="100" height="26" rx="4" fill="#d1fae5"/>
+  <text x="980" y="282" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#047857">Conversation</text>
+  
+  <!-- AWS S3 -->
+  <rect x="800" y="350" width="280" height="120" rx="12" fill="#ffffff" stroke="#ea580c" stroke-width="2"/>
+  <rect x="800" y="350" width="280" height="35" rx="12" fill="url(#s3Grad)"/>
+  <text x="940" y="372" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">AWS S3</text>
+  
+  <text x="940" y="405" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#475569">Document Storage</text>
+  
+  <rect x="820" y="425" width="240" height="30" rx="4" fill="#ffedd5"/>
+  <text x="940" y="443" text-anchor="middle" font-family="Courier New, monospace" font-size="10" fill="#9a3412">uploads/{userId}/{uuid}-{file}</text>
+  
+  <!-- Redis -->
+  <rect x="800" y="490" width="280" height="80" rx="12" fill="#ffffff" stroke="#dc2626" stroke-width="2"/>
+  <rect x="800" y="490" width="280" height="35" rx="12" fill="url(#redisGrad)"/>
+  <text x="940" y="512" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">Redis</text>
+  
+  <text x="940" y="540" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#475569">Job Queue (BullMQ)</text>
+  
+  <!-- Arrows -->
+  <!-- Client to Server -->
+  <path d="M400 190 L450 190" stroke="#4f46e5" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M400 210 L450 210" stroke="#4f46e5" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M400 230 L450 230" stroke="#4f46e5" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Server to DB -->
+  <path d="M750 210 L800 210" stroke="#059669" stroke-width="2" fill="none"/>
+  <line x1="775" y1="200" x2="775" y2="220" stroke="#059669" stroke-width="2"/>
+  <text x="790" y="200" font-family="Arial, sans-serif" font-size="9" fill="#059669">HTTP</text>
+  
+  <!-- Server to S3 -->
+  <path d="M750 390 L800 390" stroke="#ea580c" stroke-width="2" fill="none"/>
+  <line x1="775" y1="380" x2="775" y2="400" stroke="#ea580c" stroke-width="2"/>
+  <text x="790" y="385" font-family="Arial, sans-serif" font-size="9" fill="#ea580c">Upload/Download</text>
+  
+  <!-- Server to Redis -->
+  <path d="M750 510 L800 510" stroke="#dc2626" stroke-width="2" fill="none"/>
+  <line x1="775" y1="500" x2="775" y2="520" stroke="#dc2626" stroke-width="2"/>
+  <text x="790" y="505" font-family="Arial, sans-serif" font-size="9" fill="#dc2626">Enqueue</text>
+  
+  <!-- Server to LLM -->
+  <path d="M600 455 L600 500" stroke="#d97706" stroke-width="2" stroke-dasharray="5,5"/>
+  <text x="615" y="480" font-family="Arial, sans-serif" font-size="9" fill="#d97706">stream</text>
+  
+  <!-- Legend -->
+  <rect x="100" y="600" width="1000" height="60" rx="8" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="120" y="625" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#475569">Legend:</text>
+  
+  <rect x="120" y="635" width="20" height="12" rx="2" fill="#4f46e5"/>
+  <text x="150" y="645" font-family="Arial, sans-serif" font-size="10" fill="#64748b">Client</text>
+  
+  <rect x="200" y="635" width="20" height="12" rx="2" fill="#0891b2"/>
+  <text x="230" y="645" font-family="Arial, sans-serif" font-size="10" fill="#64748b">Server</text>
+  
+  <rect x="290" y="635" width="20" height="12" rx="2" fill="#059669"/>
+  <text x="320" y="645" font-family="Arial, sans-serif" font-size="10" fill="#64748b">Database</text>
+  
+  <rect x="380" y="635" width="20" height="12" rx="2" fill="#ea580c"/>
+  <text x="410" y="645" font-family="Arial, sans-serif" font-size="10" fill="#64748b">Storage</text>
+  
+  <rect x="470" y="635" width="20" height="12" rx="2" fill="#dc2626"/>
+  <text x="500" y="645" font-family="Arial, sans-serif" font-size="10" fill="#64748b">Queue</text>
+  
+  <rect x="560" y="635" width="20" height="12" rx="2" fill="#d97706" stroke="#d97706"/>
+  <line x1="560" y1="638" x2="580" y2="645" stroke="#d97706" stroke-width="2"/>
+  <text x="590" y="645" font-family="Arial, sans-serif" font-size="10" fill="#64748b">External API</text>
+</svg>

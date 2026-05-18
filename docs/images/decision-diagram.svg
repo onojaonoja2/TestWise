@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 600">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8fafc"/>
+      <stop offset="100%" style="stop-color:#e2e8f0"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1100" height="600" fill="url(#bgGrad)"/>
+  
+  <!-- Title -->
+  <text x="550" y="35" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1e293b">Key Architectural Decisions</text>
+  <text x="550" y="55" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#64748b">Tradeoffs, Failures, and Lessons Learned</text>
+  
+  <!-- Decision 1: LLM-Native vs RAG -->
+  <rect x="50" y="90" width="480" height="140" rx="12" fill="#ffffff" stroke="#4f46e5" stroke-width="2"/>
+  <rect x="50" y="90" width="480" height="30" rx="12" fill="#4f46e5"/>
+  <text x="290" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ffffff">Decision #1: LLM-Native vs RAG with Chunking</text>
+  
+  <rect x="70" y="135" width="200" height="40" rx="6" fill="#fef3c7"/>
+  <text x="170" y="152" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#92400e">Chose: LLM-Native</text>
+  <text x="170" y="167" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#b45309">Send full doc to LLM</text>
+  
+  <rect x="290" y="135" width="220" height="40" rx="6" fill="#fee2e2"/>
+  <text x="400" y="152" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#991b1b">Rejected: RAG + Chunking</text>
+  <text x="400" y="167" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#b91c1c">10K chunks + embeddings</text>
+  
+  <text x="70" y="200" font-family="Arial, sans-serif" font-size="10" fill="#475569">Tradeoff:</text>
+  <text x="70" y="215" font-family="Arial, sans-serif" font-size="9" fill="#6b7280">• Speed over precision (acceptable for chat use case)</text>
+  
+  <!-- Decision 2: Streaming -->
+  <rect x="550" y="90" width="500" height="140" rx="12" fill="#ffffff" stroke="#0891b2" stroke-width="2"/>
+  <rect x="550" y="90" width="500" height="30" rx="12" fill="#0891b2"/>
+  <text x="800" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ffffff">Decision #2: Streaming Responses</text>
+  
+  <rect x="570" y="135" width="210" height="40" rx="6" fill="#dcfce7"/>
+  <text x="675" y="152" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#166534">Chose: Server-Sent Events</text>
+  <text x="675" y="167" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#15803d">Real-time token streaming</text>
+  
+  <rect x="800" y="135" width="230" height="40" rx="6" fill="#fee2e2"/>
+  <text x="915" y="152" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#991b1b">Alternative: Polling</text>
+  <text x="915" y="167" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#b91c1c">Wait for full response</text>
+  
+  <text x="570" y="200" font-family="Arial, sans-serif" font-size="10" fill="#475569">Tradeoff:</text>
+  <text x="570" y="215" font-family="Arial, sans-serif" font-size="9" fill="#6b7280">• Better UX (shows "thinking") vs simpler code</text>
+  
+  <!-- Decision 3: S3 Storage -->
+  <rect x="50" y="250" width="480" height="140" rx="12" fill="#ffffff" stroke="#ea580c" stroke-width="2"/>
+  <rect x="50" y="250" width="480" height="30" rx="12" fill="#ea580c"/>
+  <text x="290" y="270" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ffffff">Decision #3: S3 vs Database Storage</text>
+  
+  <rect x="70" y="295" width="200" height="40" rx="6" fill="#dcfce7"/>
+  <text x="170" y="312" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#166534">Chose: AWS S3</text>
+  <text x="170" y="327" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#15803d">Scalable file storage</text>
+  
+  <rect x="290" y="295" width="220" height="40" rx="6" fill="#fee2e2"/>
+  <text x="400" y="312" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#991b1b">Alternative: PostgreSQL BYTEA</text>
+  <text x="400" y="327" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#b91c1c">Store in DB directly</text>
+  
+  <text x="70" y="360" font-family="Arial, sans-serif" font-size="10" fill="#475569">Tradeoff:</text>
+  <text x="70" y="375" font-family="Arial, sans-serif" font-size="9" fill="#6b7280">• Separation of concerns vs additional service</text>
+  
+  <!-- Decision 4: BullMQ -->
+  <rect x="550" y="250" width="500" height="140" rx="12" fill="#ffffff" stroke="#dc2626" stroke-width="2"/>
+  <rect x="550" y="250" width="500" height="30" rx="12" fill="#dc2626"/>
+  <text x="800" y="270" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ffffff">Decision #4: Async Processing with BullMQ</text>
+  
+  <rect x="570" y="295" width="210" height="40" rx="6" fill="#dcfce7"/>
+  <text x="675" y="312" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#166534">Chose: BullMQ + Redis</text>
+  <text x="675" y="327" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#15803d">Reliable job queuing</text>
+  
+  <rect x="800" y="295" width="230" height="40" rx="6" fill="#fee2e2"/>
+  <text x="915" y="312" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#991b1b">Alternative: Sync Processing</text>
+  <text x="915" y="327" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#b91c1c">Block HTTP request</text>
+  
+  <text x="570" y="360" font-family="Arial, sans-serif" font-size="10" fill="#475569">Tradeoff:</text>
+  <text x="570" y="375" font-family="Arial, sans-serif" font-size="9" fill="#6b7280">• Reliability + concurrency vs added complexity</text>
+  
+  <!-- Failures Section -->
+  <rect x="50" y="410" width="480" height="150" rx="12" fill="#ffffff" stroke="#991b1b" stroke-width="2"/>
+  <rect x="50" y="410" width="480" height="30" rx="12" fill="#991b1b"/>
+  <text x="290" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ffffff">What Failed During Development</text>
+  
+  <text x="70" y="455" font-family="Arial, sans-serif" font-size="11" fill="#475569">❌ First Attempt: Chunking Approach</text>
+  <text x="70" y="472" font-family="Arial, sans-serif" font-size="9" fill="#6b7280">• 10,000 chunks from a single PDF</text>
+  <text x="70" y="485" font-family="Arial, sans-serif" font-size="9" fill="#6b7280">• Embedding generation: 38+ batches × 100 chunks</text>
+  <text x="70" y="498" font-family="Arial, sans-serif" font-size="9" fill="#6b7280">• DB insert timeouts (Prisma transaction expired)</text>
+  <text x="70" y="511" font-family="Arial, sans-serif" font-size="9" fill="#6b7280">• User waited 5+ minutes with no feedback</text>
+  <text x="70" y="530" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#b91c1c">→ Result: Usable but frustrating experience</text>
+  
+  <!-- Lessons Learned -->
+  <rect x="550" y="410" width="500" height="150" rx="12" fill="#ffffff" stroke="#059669" stroke-width="2"/>
+  <rect x="550" y="410" width="500" height="30" rx="12" fill="#059669"/>
+  <text x="800" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ffffff">Lessons Learned</text>
+  
+  <text x="570" y="455" font-family="Arial, sans-serif" font-size="11" fill="#475569">✓ Pivot to LLM-Native</text>
+  <text x="570" y="472" font-family="Arial, sans-serif" font-size="9" fill="#6b7280">• Token budgets > accuracy for chat</text>
+  <text x="570" y="485" font-family="Arial, sans-serif" font-size="9" fill="#6b7280">• Modern LLMs handle long contexts well</text>
+  <text x="570" y="498" font-family="Arial, sans-serif" font-size="9" fill="#6b7280">• Simpler = more maintainable</text>
+  
+  <text x="570" y="518" font-family="Arial, sans-serif" font-size="11" fill="#475569">✓ Add Streaming</text>
+  <text x="570" y="535" font-family="Arial, sans-serif" font-size="9" fill="#6b7280">• Immediate feedback reduces perceived wait</text>
+  <text x="570" y="548" font-family="Arial, sans-serif" font-size="9" fill="#6b7280">• Shows "thinking" state</text>
+  
+  <!-- Hindsight Box -->
+  <rect x="50" y="570" width="1000" height="25" rx="6" fill="#fef3c7" stroke="#fcd34d"/>
+  <text x="550" y="587" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#92400e">💡 Hindsight: Would add semantic chunking (sentence-based) + caching layer if rebuilding today</text>
+</svg>

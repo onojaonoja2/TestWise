@@ -27,10 +27,59 @@ export default function DocumentsPage() {
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
+  const [uploadedDocId, setUploadedDocId] = useState<string | null>(null)
 
   useEffect(() => {
     fetchDocuments()
   }, [])
+
+  useEffect(() => {
+    if (!uploadedDocId) return
+
+    let attempts = 0
+    const maxAttempts = 30
+    let timeoutId: NodeJS.Timeout
+
+    const checkDocumentStatus = async () => {
+      attempts++
+      
+      if (attempts > maxAttempts) {
+        showToast('Document processing is taking longer than expected.', 'warning')
+        setUploadedDocId(null)
+        return
+      }
+
+      try {
+        const res = await fetch(`/api/documents/${uploadedDocId}`)
+        if (res.ok) {
+          const updatedDoc = await res.json()
+          
+          if (updatedDoc.status === 'READY') {
+            showToast('Document ready!', 'success')
+            router.push(`/dashboard/documents/${uploadedDocId}`)
+            setUploadedDocId(null)
+            return
+          }
+          
+          if (updatedDoc.status === 'FAILED') {
+            showToast('Document processing failed. Please try again.', 'error')
+            setUploadedDocId(null)
+            return
+          }
+        }
+      } catch (error) {
+        console.error('Error checking document status:', error)
+      }
+
+      timeoutId = setTimeout(checkDocumentStatus, 2000)
+    }
+
+    timeoutId = setTimeout(checkDocumentStatus, 2000)
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
+    }
+  }, [uploadedDocId, router, showToast])
 
   async function fetchDocuments() {
     try {
@@ -87,6 +136,8 @@ export default function DocumentsPage() {
         throw new Error(errorMessage)
       }
 
+      const data = await res.json()
+      setUploadedDocId(data.id)
       await fetchDocuments()
     } catch (error) {
       console.error('Upload failed', error)

@@ -71,7 +71,7 @@ export async function generateCompletion(
       { role: "user", content: params.userPrompt },
     ],
     response_format: params.jsonMode ? { type: "json_object" } : undefined,
-    max_tokens: params.maxTokens ?? 2048,
+    max_tokens: params.maxTokens ?? 1500,
     temperature: params.temperature ?? 0.3,
   })
 
@@ -81,4 +81,20 @@ export async function generateCompletion(
   }
 
   return content
+}
+
+export function createStreamingCompletion(params: GenerateCompletionParams) {
+  const openai = getClient()
+  const model = params.model || process.env.OPENROUTER_MODEL || "openai/gpt-4o"
+
+  return openai.chat.completions.create({
+    model,
+    messages: [
+      { role: "system", content: params.systemPrompt },
+      { role: "user", content: params.userPrompt },
+    ],
+    max_tokens: params.maxTokens ?? 4096,
+    temperature: params.temperature ?? 0.3,
+    stream: true,
+  })
 }
