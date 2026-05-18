@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import BackButton from '@/app/components/BackButton'
+import { useToast } from '@/app/components/ToastProvider'
 
 interface QuestionDraft {
     text: string
@@ -22,6 +23,7 @@ interface BioDataField {
 export default function CreateTestPage() {
     const router = useRouter()
     const { data: session } = useSession()
+    const { showToast } = useToast()
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
     const [duration, setDuration] = useState(60)
@@ -51,9 +53,9 @@ export default function CreateTestPage() {
     })
 
     const addQuestion = () => {
-        if (!newQ.text) return alert('Question text is required')
-        if (newQ.type === 'MULTIPLE_CHOICE' && newQ.options.some(o => !o)) return alert('All options are required')
-        if (!newQ.correctAnswer) return alert('Correct answer is required')
+        if (!newQ.text) return showToast('Question text is required', 'warning')
+        if (newQ.type === 'MULTIPLE_CHOICE' && newQ.options.some(o => !o)) return showToast('All options are required', 'warning')
+        if (!newQ.correctAnswer) return showToast('Correct answer is required', 'warning')
 
         setQuestions([...questions, { ...newQ }])
         // Reset new question form
@@ -90,8 +92,8 @@ export default function CreateTestPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!title) return alert('Title is required')
-        if (questions.length === 0) return alert('Add at least one question')
+        if (!title) return showToast('Title is required', 'warning')
+        if (questions.length === 0) return showToast('Add at least one question', 'warning')
 
         setSubmitting(true)
         try {
@@ -113,17 +115,16 @@ export default function CreateTestPage() {
             })
 
             if (res.ok) {
+                showToast('Test created successfully!', 'success')
                 router.push('/dashboard')
                 router.refresh()
             } else {
                 const msg = await res.text()
-                console.error(`Failed to create test: ${msg}`)
-                alert(`Failed to create test. Check console for details.`)
+                showToast(msg || 'Failed to create test', 'error')
                 setSubmitting(false)
             }
         } catch (error) {
-            console.error(error)
-            alert('Failed to create test. Check console for details.')
+            showToast('Failed to create test. Please try again.', 'error')
             setSubmitting(false)
         }
     }

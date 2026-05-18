@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useToast } from '@/app/components/ToastProvider'
+import { useModal } from '@/app/components/ModalProvider'
 
 interface TestManagementButtonsProps {
     testId: string
@@ -14,6 +16,8 @@ interface TestManagementButtonsProps {
 
 export default function TestManagementButtons({ testId, published, archived, visibility, submissionCount }: TestManagementButtonsProps) {
     const router = useRouter()
+    const { showToast } = useToast()
+    const { confirm } = useModal()
     const [loading, setLoading] = useState(false)
 
     const updateStatus = async (updates: { published?: boolean; archived?: boolean }) => {
@@ -28,20 +32,24 @@ export default function TestManagementButtons({ testId, published, archived, vis
             if (res.ok) {
                 router.refresh()
             } else {
-                alert("Failed to update test status")
+                showToast('Failed to update test status', 'error')
             }
         } catch (error) {
-            console.error("Failed to update test", error)
-            alert("An error occurred")
+            showToast('An error occurred', 'error')
         } finally {
             setLoading(false)
         }
     }
 
     const deleteTest = async () => {
-        if (!confirm("Are you sure you want to delete this test? This action cannot be undone.")) {
-            return
-        }
+        const confirmed = await confirm({
+          title: 'Delete Test',
+          message: 'Are you sure you want to delete this test? This action cannot be undone.',
+          confirmText: 'Delete',
+          cancelText: 'Cancel',
+          type: 'danger',
+        })
+        if (!confirmed) return
 
         setLoading(true)
         try {
@@ -52,11 +60,10 @@ export default function TestManagementButtons({ testId, published, archived, vis
             if (res.ok) {
                 router.refresh()
             } else {
-                alert("Failed to delete test")
+                showToast('Failed to delete test', 'error')
             }
         } catch (error) {
-            console.error("Failed to delete test", error)
-            alert("An error occurred")
+            showToast('An error occurred', 'error')
         } finally {
             setLoading(false)
         }
@@ -69,7 +76,7 @@ export default function TestManagementButtons({ testId, published, archived, vis
     const copyLink = () => {
         const link = `${window.location.origin}/test/${testId}`
         navigator.clipboard.writeText(link)
-        alert("Link copied to clipboard!")
+        showToast('Link copied to clipboard!', 'success')
     }
 
     const isEditable = !published && submissionCount === 0

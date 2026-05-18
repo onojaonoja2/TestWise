@@ -4,6 +4,8 @@ import { useState, useEffect, use } from 'react'
 import { useSession } from 'next-auth/react'
 import { Plus, Trash2, Shield, ShieldOff, User as UserIcon } from 'lucide-react'
 import BackButton from '@/app/components/BackButton'
+import { useToast } from '@/app/components/ToastProvider'
+import { useModal } from '@/app/components/ModalProvider'
 
 interface User {
     id: string
@@ -17,6 +19,8 @@ interface User {
 export default function OrganizationDetailsPage({ params }: { params: Promise<{ orgId: string }> }) {
     const { orgId } = use(params)
     const { data: session } = useSession()
+    const { showToast } = useToast()
+    const { confirm } = useModal()
     const [users, setUsers] = useState<User[]>([])
     const [loading, setLoading] = useState(true)
     const [newUser, setNewUser] = useState({ name: '', email: '', password: '', isSubAdmin: false })
@@ -58,7 +62,7 @@ export default function OrganizationDetailsPage({ params }: { params: Promise<{ 
             }
         } catch (error) {
             console.error('Failed to fetch tests', error)
-            alert('Failed to fetch tests')
+            showToast('Failed to fetch tests', 'error')
         } finally {
             setLoadingTests(false)
         }
@@ -84,13 +88,13 @@ export default function OrganizationDetailsPage({ params }: { params: Promise<{ 
             if (res.ok) {
                 setNewUser({ name: '', email: '', password: '', isSubAdmin: false })
                 fetchUsers()
+                showToast('User created successfully', 'success')
             } else {
                 const msg = await res.text()
-                alert(`Failed to create user: ${msg}`)
+                showToast(`Failed to create user: ${msg}`, 'error')
             }
         } catch (error) {
-            console.error(error)
-            alert('Error creating user')
+            showToast('Error creating user', 'error')
         } finally {
             setCreating(false)
         }
@@ -106,17 +110,24 @@ export default function OrganizationDetailsPage({ params }: { params: Promise<{ 
 
             if (res.ok) {
                 fetchUsers()
+                showToast('User role updated', 'success')
             } else {
-                alert('Failed to update user')
+                showToast('Failed to update user', 'error')
             }
         } catch (error) {
-            console.error(error)
-            alert('Error updating user')
+            showToast('Error updating user', 'error')
         }
     }
 
     const handleDeleteUser = async (userId: string) => {
-        if (!confirm('Are you sure you want to delete this user?')) return
+        const confirmed = await confirm({
+            title: 'Delete User',
+            message: 'Are you sure you want to delete this user?',
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+            type: 'danger',
+        })
+        if (!confirmed) return
 
         try {
             const res = await fetch(`/api/users/${userId}`, {
@@ -125,12 +136,12 @@ export default function OrganizationDetailsPage({ params }: { params: Promise<{ 
 
             if (res.ok) {
                 fetchUsers()
+                showToast('User deleted', 'success')
             } else {
-                alert('Failed to delete user')
+                showToast('Failed to delete user', 'error')
             }
         } catch (error) {
-            console.error(error)
-            alert('Error deleting user')
+            showToast('Error deleting user', 'error')
         }
     }
 

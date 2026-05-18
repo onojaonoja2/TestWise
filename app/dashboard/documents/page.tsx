@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { FileText, Loader2, Trash2, Upload, CheckCircle, XCircle, Clock } from 'lucide-react'
+import { useToast } from '@/app/components/ToastProvider'
+import { useModal } from '@/app/components/ModalProvider'
 
 interface Document {
   id: string
@@ -20,6 +22,8 @@ interface Document {
 
 export default function DocumentsPage() {
   const router = useRouter()
+  const { showToast } = useToast()
+  const { confirm } = useModal()
   const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
@@ -52,12 +56,12 @@ export default function DocumentsPage() {
     ]
 
     if (!allowedTypes.includes(file.type)) {
-      alert('Unsupported file type. Allowed: PDF, DOCX, TXT')
+      showToast('Unsupported file type. Allowed: PDF, DOCX, TXT', 'error')
       return
     }
 
     if (file.size > 50 * 1024 * 1024) {
-      alert('File too large. Maximum size is 50MB')
+      showToast('File too large. Maximum size is 50MB', 'error')
       return
     }
 
@@ -87,9 +91,9 @@ export default function DocumentsPage() {
     } catch (error) {
       console.error('Upload failed', error)
       if (error instanceof TypeError && error.message.includes('fetch')) {
-        alert('Unable to connect to server. Please check your network connection and ensure the dev server is running.')
+        showToast('Unable to connect to server. Please check your network connection.', 'error')
       } else {
-        alert(error instanceof Error ? error.message : 'Upload failed')
+        showToast(error instanceof Error ? error.message : 'Upload failed', 'error')
       }
     } finally {
       setUploading(false)
@@ -98,15 +102,23 @@ export default function DocumentsPage() {
   }
 
   async function handleDelete(id: string, name: string) {
-    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return
+    const confirmed = await confirm({
+      title: 'Delete Document',
+      message: `Delete "${name}"? This cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      type: 'danger',
+    })
+    if (!confirmed) return
 
     try {
       const res = await fetch(`/api/documents/${id}`, { method: 'DELETE' })
       if (res.ok) {
         setDocuments((prev) => prev.filter((d) => d.id !== id))
+        showToast('Document deleted', 'success')
       }
     } catch (error) {
-      console.error('Delete failed', error)
+      showToast('Failed to delete document', 'error')
     }
   }
 

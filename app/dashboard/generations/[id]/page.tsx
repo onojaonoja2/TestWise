@@ -258,7 +258,7 @@ export default function ReviewGenerationPage() {
                   value={editData?.text || ''}
                   onChange={(e) => setEditData((d) => ({ ...d, text: e.target.value }))}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
 
@@ -274,7 +274,7 @@ export default function ReviewGenerationPage() {
                           newOpts[i] = e.target.value
                           setEditData((d) => ({ ...d, options: newOpts }))
                         }}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
                   ))}
@@ -286,7 +286,7 @@ export default function ReviewGenerationPage() {
                 <input
                   value={editData?.correctAnswer || ''}
                   onChange={(e) => setEditData((d) => ({ ...d, correctAnswer: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
 
@@ -296,7 +296,7 @@ export default function ReviewGenerationPage() {
                   value={editData?.explanation || ''}
                   onChange={(e) => setEditData((d) => ({ ...d, explanation: e.target.value }))}
                   rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
 

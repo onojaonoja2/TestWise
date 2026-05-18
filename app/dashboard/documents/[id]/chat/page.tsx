@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { Loader2, ArrowLeft, Send, MessageSquare, Trash2, Plus } from 'lucide-react'
+import { useToast } from '@/app/components/ToastProvider'
+import { useModal } from '@/app/components/ModalProvider'
 
 interface Message {
   id: string
@@ -28,6 +30,8 @@ interface DocumentInfo {
 
 export default function DocumentChatPage() {
   const params = useParams()
+  const { showToast } = useToast()
+  const { confirm } = useModal()
   const [doc, setDoc] = useState<DocumentInfo | null>(null)
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [activeConversation, setActiveConversation] = useState<Conversation | null>(null)
@@ -107,7 +111,14 @@ export default function DocumentChatPage() {
     e.preventDefault()
     e.stopPropagation()
     
-    if (!confirm('Delete this conversation?')) return
+    const confirmed = await confirm({
+      title: 'Delete Conversation',
+      message: 'Delete this conversation? This cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      type: 'danger',
+    })
+    if (!confirmed) return
     
     try {
       const res = await fetch(`/api/documents/${params.id}/conversations/${conversationId}`, {

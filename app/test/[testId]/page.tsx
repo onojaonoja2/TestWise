@@ -3,6 +3,8 @@
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession, signIn } from 'next-auth/react'
+import { useToast } from '@/app/components/ToastProvider'
+import { useModal } from '@/app/components/ModalProvider'
 
 interface Question {
     id: string
@@ -28,9 +30,11 @@ interface Test {
 }
 
 export default function TestPage({ params }: { params: Promise<{ testId: string }> }) {
-    const { data: session, status: sessionStatus } = useSession()
     const { testId } = use(params)
     const router = useRouter()
+    const { data: session } = useSession()
+    const { showToast } = useToast()
+    const { confirm } = useModal()
     const [test, setTest] = useState<Test | null>(null)
     const [loading, setLoading] = useState(true)
     const [answers, setAnswers] = useState<Record<string, string>>({})
@@ -271,7 +275,16 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
     }
 
     const handleSubmit = async (autoSubmit = false) => {
-        if (!autoSubmit && !confirm('Are you sure you want to submit?')) return
+        if (!autoSubmit) {
+            const confirmed = await confirm({
+                title: 'Submit Test',
+                message: 'Are you sure you want to submit? You cannot change your answers after submission.',
+                confirmText: 'Submit',
+                cancelText: 'Cancel',
+                type: 'warning',
+            })
+            if (!confirmed) return
+        }
 
         setSubmitting(true)
         try {

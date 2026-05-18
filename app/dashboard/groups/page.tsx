@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Plus, Users, ArrowRight } from 'lucide-react'
+import { useToast } from '@/app/components/ToastProvider'
 
 interface Group {
     id: string
@@ -13,6 +14,7 @@ interface Group {
 }
 
 export default function GroupsPage() {
+    const { showToast } = useToast()
     const [groups, setGroups] = useState<Group[]>([])
     const [loading, setLoading] = useState(true)
     const [newGroupName, setNewGroupName] = useState('')
@@ -51,12 +53,12 @@ export default function GroupsPage() {
             if (res.ok) {
                 setNewGroupName('')
                 fetchGroups()
+                showToast('Group created successfully!', 'success')
             } else {
-                alert('Failed to create group')
+                showToast('Failed to create group', 'error')
             }
         } catch (error) {
-            console.error(error)
-            alert('Error creating group')
+            showToast('Error creating group', 'error')
         } finally {
             setCreating(false)
         }

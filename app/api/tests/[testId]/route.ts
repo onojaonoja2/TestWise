@@ -166,7 +166,7 @@ export async function PATCH(
             // Only update relations if editable
             if (isEditable) {
                 // 2. Update Allowed Users (Whitelist)
-                if (allowedEmails && Array.isArray(allowedEmails)) {
+                if (allowedEmails !== undefined && Array.isArray(allowedEmails)) {
                     await tx.testAllowedUser.deleteMany({
                         where: { testId }
                     })
@@ -181,29 +181,31 @@ export async function PATCH(
                 }
 
                 // 3. Update Questions
-                if (questions && Array.isArray(questions)) {
+                if (questions !== undefined && Array.isArray(questions)) {
                     // Delete existing questions
                     await tx.question.deleteMany({
                         where: { testId }
                     })
 
-                    // Create new questions
-                    for (const q of questions) {
-                        await tx.question.create({
-                            data: {
+                    // Create new questions using createMany for efficiency
+                    if (questions.length > 0) {
+                        await tx.question.createMany({
+                            data: questions.map((q) => ({
                                 testId,
                                 text: q.text,
                                 type: q.type,
-                                points: q.points,
+                                points: q.points || 1,
                                 options: q.options,
                                 correctAnswer: q.correctAnswer
-                            }
+                            }))
                         })
                     }
                 }
             }
 
             return t
+        }, {
+            timeout: 30000 // 30 second timeout for larger operations
         })
 
         return NextResponse.json(updatedTest)

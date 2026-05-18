@@ -4,6 +4,8 @@ import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import BackButton from '@/app/components/BackButton'
+import { useToast } from '@/app/components/ToastProvider'
+import { useModal } from '@/app/components/ModalProvider'
 
 interface QuestionDraft {
     text: string
@@ -23,6 +25,8 @@ export default function EditTestPage({ params }: { params: Promise<{ testId: str
     const { testId } = use(params)
     const router = useRouter()
     const { data: session } = useSession()
+    const { showToast } = useToast()
+    const { confirm } = useModal()
     const [loading, setLoading] = useState(true)
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
@@ -66,8 +70,7 @@ export default function EditTestPage({ params }: { params: Promise<{ testId: str
                     setAllowedEmails(data.allowedUsers.map((u: { email: string }) => u.email).join(', '))
                 }
             } catch (error) {
-                console.error(error)
-                alert("Failed to load test data")
+                showToast('Failed to load test data', 'error')
                 router.push('/dashboard')
             } finally {
                 setLoading(false)
@@ -77,9 +80,9 @@ export default function EditTestPage({ params }: { params: Promise<{ testId: str
     }, [testId, router])
 
     const addQuestion = () => {
-        if (!newQ.text) return alert('Question text is required')
-        if (newQ.type === 'MULTIPLE_CHOICE' && newQ.options.some(o => !o)) return alert('All options are required')
-        if (!newQ.correctAnswer) return alert('Correct answer is required')
+        if (!newQ.text) return showToast('Question text is required', 'warning')
+        if (newQ.type === 'MULTIPLE_CHOICE' && newQ.options.some(o => !o)) return showToast('All options are required', 'warning')
+        if (!newQ.correctAnswer) return showToast('Correct answer is required', 'warning')
 
         setQuestions([...questions, { ...newQ }])
         // Reset new question form
@@ -119,12 +122,17 @@ export default function EditTestPage({ params }: { params: Promise<{ testId: str
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!title) return alert('Title is required')
-        if (questions.length === 0) return alert('Add at least one question')
+        if (!title) return showToast('Title is required', 'warning')
+        if (questions.length === 0) return showToast('Add at least one question', 'warning')
 
-        if (!confirm("Saving changes will overwrite existing questions. If students have already taken this test, their answers to deleted questions might be lost or become invalid. Continue?")) {
-            return
-        }
+        const confirmed = await confirm({
+          title: 'Confirm Changes',
+          message: 'Saving changes will overwrite existing questions. If students have already taken this test, their answers to deleted questions might be lost or become invalid. Continue?',
+          confirmText: 'Save',
+          cancelText: 'Cancel',
+          type: 'warning',
+        })
+        if (!confirmed) return
 
         setSubmitting(true)
         try {
@@ -148,17 +156,16 @@ export default function EditTestPage({ params }: { params: Promise<{ testId: str
             })
 
             if (res.ok) {
+                showToast('Test saved successfully!', 'success')
                 router.push('/dashboard')
                 router.refresh()
             } else {
                 const msg = await res.text()
-                console.error(`Failed to update test: ${msg}`)
-                alert(`Failed to update test. Check console for details.`)
+                showToast(msg || 'Failed to update test', 'error')
                 setSubmitting(false)
             }
         } catch (error) {
-            console.error(error)
-            alert('Failed to update test. Check console for details.')
+            showToast('Failed to update test. Please try again.', 'error')
             setSubmitting(false)
         }
     }

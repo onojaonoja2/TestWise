@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { ArrowLeft, Plus } from 'lucide-react'
+import { useToast } from '@/app/components/ToastProvider'
 
 interface Student {
     name: string
@@ -13,6 +14,7 @@ interface Student {
 
 export default function GroupDetailsPage() {
     const params = useParams()
+    const { showToast } = useToast()
     const groupId = params.groupId as string
     const [students, setStudents] = useState<Student[]>([]) // List of students to add
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -52,16 +54,15 @@ export default function GroupDetailsPage() {
             })
 
             if (res.ok) {
-                alert('Students added successfully!')
+                showToast('Students added successfully!', 'success')
                 setStudents([])
                 // Ideally fetch updated group members here if we were displaying them
             } else {
                 const msg = await res.text()
-                alert(`Failed to add students: ${msg}`)
+                showToast(`Failed to add students: ${msg}`, 'error')
             }
         } catch (error) {
-            console.error(error)
-            alert('Error adding students')
+            showToast('Error adding students', 'error')
         } finally {
             setAdding(false)
         }

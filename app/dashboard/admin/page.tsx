@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Plus, Building2, Users, ArrowRight } from 'lucide-react'
+import { useToast } from '@/app/components/ToastProvider'
+import { useModal } from '@/app/components/ModalProvider'
 
 interface Organization {
     id: string
@@ -14,6 +16,8 @@ interface Organization {
 }
 
 export default function AdminDashboard() {
+    const { showToast } = useToast()
+    const { confirm } = useModal()
     const [organizations, setOrganizations] = useState<Organization[]>([])
     const [loading, setLoading] = useState(true)
     const [newOrgName, setNewOrgName] = useState('')
@@ -52,12 +56,12 @@ export default function AdminDashboard() {
             if (res.ok) {
                 setNewOrgName('')
                 fetchOrganizations()
+                showToast('Organization created', 'success')
             } else {
-                alert('Failed to create organization')
+                showToast('Failed to create organization', 'error')
             }
         } catch (error) {
-            console.error(error)
-            alert('Error creating organization')
+            showToast('Error creating organization', 'error')
         } finally {
             setCreating(false)
         }
@@ -130,16 +134,24 @@ export default function AdminDashboard() {
                                     <ArrowRight className="h-5 w-5" />
                                 </Link>
                                 <button
-                                    onClick={(e) => {
+                                    onClick={async (e) => {
                                         e.preventDefault()
-                                        if (confirm(`Are you sure you want to delete ${org.name}? This will delete ALL users and data associated with it.`)) {
-                                            // Call delete API
-                                            fetch(`/api/organizations/${org.id}`, { method: 'DELETE' })
-                                                .then(res => {
-                                                    if (res.ok) fetchOrganizations()
-                                                    else alert('Failed to delete organization')
-                                                })
-                                        }
+                                        const confirmed = await confirm({
+                                            title: 'Delete Organization',
+                                            message: `Are you sure you want to delete ${org.name}? This will delete ALL users and data associated with it.`,
+                                            confirmText: 'Delete',
+                                            cancelText: 'Cancel',
+                                            type: 'danger',
+                                        })
+                                        if (!confirmed) return
+                                        fetch(`/api/organizations/${org.id}`, { method: 'DELETE' })
+                                            .then(res => {
+                                                if (res.ok) {
+                                                    fetchOrganizations()
+                                                    showToast('Organization deleted', 'success')
+                                                }
+                                                else showToast('Failed to delete organization', 'error')
+                                            })
                                     }}
                                     className="text-red-400 hover:text-red-600 p-1"
                                     title="Delete Organization"
