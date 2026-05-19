@@ -33,7 +33,7 @@ interface Test {
 export default function TestPage({ params }: { params: Promise<{ testId: string }> }) {
     const { testId } = use(params)
     const router = useRouter()
-    const { data: session } = useSession()
+    const { data: session, status } = useSession()
     const { showToast } = useToast()
     const { confirm } = useModal()
     const [test, setTest] = useState<Test | null>(null)
@@ -318,7 +318,7 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
         return `${mins}:${secs.toString().padStart(2, '0')}`
     }
 
-    if (loading || sessionStatus === 'loading') return <div className="p-8 text-center">Loading test...</div>
+    if (loading || status === 'loading') return <div className="p-8 text-center">Loading test...</div>
     if (!test) return <div className="p-8 text-center">Test not found</div>
 
     // Bio Data Form

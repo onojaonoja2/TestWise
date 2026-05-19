@@ -15,16 +15,13 @@ async function extractText(
   if (mimeType === "application/pdf") {
     const { default: PDFParser } = await import("pdf2json")
     return new Promise<string>((resolve, reject) => {
-      const parser = new PDFParser(null, true, {
-        ignoreExternal: true,
-        verbosity: 0
-      })
+      const parser = new PDFParser(null, true, "") as any
       parser.on("pdfParser_dataReady", () => {
         const raw = parser.getRawTextContent()
         parser.destroy()
         resolve(raw)
       })
-      parser.on("pdfParser_dataError", (err) => {
+      parser.on("pdfParser_dataError", (err: unknown) => {
         parser.destroy()
         reject(err instanceof Error ? err : new Error("PDF parsing failed"))
       })
