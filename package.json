@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "set NODE_OPTIONS=--max-old-space-size=4096 && next dev",
-    "build": "set NODE_OPTIONS=--max-old-space-size=4096 && prisma generate && next build",
+    "dev": "cross-env NODE_OPTIONS=--max-old-space-size=4096 next dev",
+    "build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
     "seed:prod": "ts-node --project prisma/tsconfig.seed.json prisma/seed-production.ts",
-    "worker": "set NODE_OPTIONS=--max-old-space-size=16384 && tsx workers/document-worker.ts"
+    "worker": "cross-env NODE_OPTIONS=--max-old-space-size=16384 tsx workers/document-worker.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1045.0",
@@ -45,6 +45,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "baseline-browser-mapping": "^2.10.29",
+    "cross-env": "^7.0.3",
     "eslint": "^9",
     "eslint-config-next": "16.0.3",
     "prisma": "^5.10.2",

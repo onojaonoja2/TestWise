@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useSession, signIn } from 'next-auth/react'
 import { useToast } from '@/app/components/ToastProvider'
 import { useModal } from '@/app/components/ModalProvider'
+import { Eye, EyeOff } from 'lucide-react'
 
 interface Question {
     id: string
@@ -46,6 +47,7 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
     // Bio Data & Guest State
     const [bioData, setBioData] = useState<Record<string, string>>({})
     const [registerInfo, setRegisterInfo] = useState({ name: '', email: '', password: '' })
+    const [showPassword, setShowPassword] = useState(false)
     const [isRegistering, setIsRegistering] = useState(false)
     const [bioDataSubmitted, setBioDataSubmitted] = useState(false)
 
@@ -379,15 +381,22 @@ export default function TestPage({ params }: { params: Promise<{ testId: string 
                                                 <label htmlFor="regPassword" className="block text-sm font-medium text-gray-700">
                                                     Password <span className="text-red-500">*</span>
                                                 </label>
-                                                <div className="mt-1">
+                                                <div className="mt-1 relative">
                                                     <input
                                                         id="regPassword"
-                                                        type="password"
+                                                        type={showPassword ? 'text' : 'password'}
                                                         required
                                                         value={registerInfo.password}
                                                         onChange={(e) => setRegisterInfo({ ...registerInfo, password: e.target.value })}
-                                                        className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                                                        className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 pr-10 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                                                     />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowPassword(!showPassword)}
+                                                        className="absolute inset-y-0 right-0 flex items-center pr-2 text-gray-500 hover:text-gray-700"
+                                                    >
+                                                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>

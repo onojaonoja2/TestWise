@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { Plus, User as UserIcon, Edit2, X, Check } from 'lucide-react'
+import { Plus, User as UserIcon, Edit2, X, Check, Eye, EyeOff } from 'lucide-react'
 
 interface User {
     id: string
@@ -18,6 +18,7 @@ export default function OrganizationManagementPage() {
     const { data: session } = useSession()
     const [users, setUsers] = useState<User[]>([])
     const [newUser, setNewUser] = useState({ name: '', email: '', password: '' })
+    const [showPassword, setShowPassword] = useState(false)
     const [creating, setCreating] = useState(false)
     const [editingId, setEditingId] = useState<string | null>(null)
     const [editForm, setEditForm] = useState({ name: '', email: '' })
@@ -254,13 +255,22 @@ export default function OrganizationManagementPage() {
                                 placeholder="Email"
                                 className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                             />
-                            <input
-                                type="password"
-                                value={newUser.password}
-                                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                                placeholder="Password"
-                                className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                            />
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={newUser.password}
+                                    onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                                    placeholder="Password"
+                                    className="block w-full rounded-md border-0 py-1.5 px-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute inset-y-0 right-0 flex items-center pr-2 text-gray-500 hover:text-gray-700"
+                                >
+                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </button>
+                            </div>
                         </div>
                         <div className="flex justify-end">
                             <button
