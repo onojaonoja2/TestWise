@@ -4,7 +4,8 @@ import { signIn } from 'next-auth/react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { BrainCircuit, ArrowLeft, Eye, EyeOff } from 'lucide-react'
+import { BrainCircuit, ArrowLeft, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 export default function SignIn() {
     const router = useRouter()
@@ -42,11 +43,21 @@ export default function SignIn() {
     }
 
     return (
-        <div className="flex min-h-screen flex-col items-center justify-center bg-[#0a0a0a] px-6 py-12 lg:px-8">
-            {/* Background Gradients */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full z-0 pointer-events-none overflow-hidden">
-                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/10 rounded-full blur-[100px]" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 rounded-full blur-[100px]" />
+        <div className="relative flex min-h-screen flex-col items-center justify-center bg-[#0a0a0a] px-6 py-12 lg:px-8 overflow-hidden">
+            {/* Animated mesh gradient background */}
+            <div className="absolute inset-0 z-0 pointer-events-none">
+                <div className="mesh-orb animate-mesh top-[-15%] left-[-10%] h-[30rem] w-[30rem] bg-indigo-600/20" />
+                <div className="mesh-orb animate-mesh bottom-[-15%] right-[-10%] h-[30rem] w-[30rem] bg-purple-600/20" style={{ animationDelay: '-8s' }} />
+                <div className="mesh-orb animate-mesh bottom-[-5%] left-[30%] h-[24rem] w-[24rem] bg-cyan-500/12" style={{ animationDelay: '-14s' }} />
+                <div
+                    className="absolute inset-0 opacity-[0.10]"
+                    style={{
+                        backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.35) 1px, transparent 0)",
+                        backgroundSize: "40px 40px",
+                        maskImage: "radial-gradient(ellipse at center, black 10%, transparent 75%)",
+                        WebkitMaskImage: "radial-gradient(ellipse at center, black 10%, transparent 75%)",
+                    }}
+                />
             </div>
 
             <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-sm">
@@ -54,12 +65,12 @@ export default function SignIn() {
                     <div className="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform duration-300">
                         <BrainCircuit className="h-8 w-8 text-white" />
                     </div>
-                    <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+                    <span className="text-2xl font-bold text-gradient animate-gradient bg-gradient-to-r from-white via-indigo-200 to-gray-400">
                         TestWise
                     </span>
                 </Link>
 
-                <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
+                <div className="glass-strong rounded-2xl p-8 shadow-2xl">
                     <h2 className="text-center text-xl font-semibold leading-9 tracking-tight text-white mb-6">
                         Sign in to your account
                     </h2>
@@ -119,13 +130,20 @@ export default function SignIn() {
                         )}
 
                         <div>
-                            <button
+                            <Button
                                 type="submit"
                                 disabled={loading}
-                                className="flex w-full justify-center rounded-lg bg-indigo-600 px-3 py-2.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex w-full h-11 rounded-lg bg-indigo-600 px-3 text-sm font-semibold leading-6 text-white shadow-lg shadow-indigo-600/25 hover:bg-indigo-500 hover:shadow-indigo-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed border-0"
                             >
-                                {loading ? 'Signing in...' : 'Sign in'}
-                            </button>
+                                {loading ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        Signing in...
+                                    </>
+                                ) : (
+                                    'Sign in'
+                                )}
+                            </Button>
                         </div>
                     </form>
 
