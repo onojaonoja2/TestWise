@@ -4,7 +4,7 @@ import { signIn } from 'next-auth/react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { BrainCircuit, ArrowLeft, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { BrainCircuit, ArrowLeft, Eye, EyeOff, Loader2, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export default function SignIn() {
@@ -43,41 +43,39 @@ export default function SignIn() {
     }
 
     return (
-        <div className="relative flex min-h-screen flex-col items-center justify-center bg-[#0a0a0a] px-6 py-12 lg:px-8 overflow-hidden">
-            {/* Animated mesh gradient background */}
-            <div className="absolute inset-0 z-0 pointer-events-none">
-                <div className="mesh-orb animate-mesh top-[-15%] left-[-10%] h-[30rem] w-[30rem] bg-indigo-600/20" />
-                <div className="mesh-orb animate-mesh bottom-[-15%] right-[-10%] h-[30rem] w-[30rem] bg-purple-600/20" style={{ animationDelay: '-8s' }} />
-                <div className="mesh-orb animate-mesh bottom-[-5%] left-[30%] h-[24rem] w-[24rem] bg-cyan-500/12" style={{ animationDelay: '-14s' }} />
-                <div
-                    className="absolute inset-0 opacity-[0.10]"
-                    style={{
-                        backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.35) 1px, transparent 0)",
-                        backgroundSize: "40px 40px",
-                        maskImage: "radial-gradient(ellipse at center, black 10%, transparent 75%)",
-                        WebkitMaskImage: "radial-gradient(ellipse at center, black 10%, transparent 75%)",
-                    }}
-                />
+        <div className="relative flex min-h-screen flex-col items-center justify-center bg-[#FAF7F1] px-6 py-12 lg:px-8 overflow-hidden">
+            <div className="absolute inset-0 pointer-events-none" aria-hidden>
+                <div className="mesh-orb animate-mesh top-[-12%] left-[-8%] h-[26rem] w-[26rem] bg-[#C2410C]/12" />
+                <div className="mesh-orb animate-mesh bottom-[-12%] right-[-8%] h-[26rem] w-[26rem] bg-amber-400/20" style={{ animationDelay: '-8s' }} />
+                <div className="absolute inset-0 dot-grid-warm opacity-40 [mask-image:radial-gradient(ellipse_60%_55%_at_50%_40%,black,transparent)]" />
             </div>
 
-            <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                <Link href="/" className="flex flex-col items-center gap-2 group mb-8">
-                    <div className="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform duration-300">
-                        <BrainCircuit className="h-8 w-8 text-white" />
+            <div className="relative w-full sm:mx-auto sm:max-w-md">
+                <Link href="/" className="flex flex-col items-center gap-2.5 group mb-8">
+                    <div className="bg-[#C2410C] p-2.5 rounded-2xl shadow-[0_12px_24px_-12px_rgba(194,65,12,0.6)] group-hover:bg-[#9A3412] transition-colors">
+                        <BrainCircuit className="h-7 w-7 text-white" />
                     </div>
-                    <span className="text-2xl font-bold text-gradient animate-gradient bg-gradient-to-r from-white via-indigo-200 to-gray-400">
-                        TestWise
+                    <span className="text-center leading-none">
+                        <span className="block font-display text-3xl font-semibold tracking-tight text-stone-900">
+                            TestWise
+                        </span>
+                        <span className="mt-1 block text-[11px] font-bold uppercase tracking-[0.2em] text-stone-500">
+                            Smart Exam OS
+                        </span>
                     </span>
                 </Link>
 
-                <div className="glass-strong rounded-2xl p-8 shadow-2xl">
-                    <h2 className="text-center text-xl font-semibold leading-9 tracking-tight text-white mb-6">
-                        Sign in to your account
+                <div className="paper-card rounded-[1.75rem] p-8">
+                    <h2 className="font-display text-2xl font-semibold tracking-tight text-stone-900 text-center">
+                        Welcome back
                     </h2>
+                    <p className="mt-1.5 text-center text-sm text-stone-500">
+                        Sign in to run your next secure exam.
+                    </p>
 
-                    <form className="space-y-6" onSubmit={handleSubmit}>
+                    <form className="mt-7 space-y-5" onSubmit={handleSubmit}>
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-300">
+                            <label htmlFor="email" className="block text-sm font-semibold text-stone-800">
                                 Email address
                             </label>
                             <div className="mt-2">
@@ -89,15 +87,15 @@ export default function SignIn() {
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="block w-full rounded-lg border-0 bg-white/5 py-2.5 px-3 text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6 transition-all"
-                                    placeholder="Enter your email"
+                                    className="block w-full rounded-xl border border-stone-900/10 bg-white py-2.5 px-3.5 text-stone-900 shadow-sm placeholder:text-stone-400 focus:border-[#C2410C] focus:outline-none focus:ring-2 focus:ring-[#C2410C]/25 sm:text-sm transition-all"
+                                    placeholder="you@school.edu"
                                 />
                             </div>
                         </div>
 
                         <div>
                             <div className="flex items-center justify-between">
-                                <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-300">
+                                <label htmlFor="password" className="block text-sm font-semibold text-stone-800">
                                     Password
                                 </label>
                             </div>
@@ -110,13 +108,14 @@ export default function SignIn() {
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="block w-full rounded-lg border-0 bg-white/5 py-2.5 px-3 pr-10 text-white shadow-sm ring-1 ring-inset ring-white/10 placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6 transition-all"
+                                    className="block w-full rounded-xl border border-stone-900/10 bg-white py-2.5 px-3.5 pr-11 text-stone-900 shadow-sm placeholder:text-stone-400 focus:border-[#C2410C] focus:outline-none focus:ring-2 focus:ring-[#C2410C]/25 sm:text-sm transition-all"
                                     placeholder="Enter your password"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-300 transition-colors"
+                                    className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-stone-400 hover:text-stone-700 transition-colors"
+                                    aria-label={showPassword ? 'Hide password' : 'Show password'}
                                 >
                                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                                 </button>
@@ -124,7 +123,7 @@ export default function SignIn() {
                         </div>
 
                         {error && (
-                            <div className="rounded-md bg-red-500/10 p-3 text-sm text-red-400 border border-red-500/20 text-center">
+                            <div className="rounded-xl bg-red-50 p-3 text-sm font-medium text-red-700 border border-red-200 text-center">
                                 {error}
                             </div>
                         )}
@@ -133,7 +132,7 @@ export default function SignIn() {
                             <Button
                                 type="submit"
                                 disabled={loading}
-                                className="flex w-full h-11 rounded-lg bg-indigo-600 px-3 text-sm font-semibold leading-6 text-white shadow-lg shadow-indigo-600/25 hover:bg-indigo-500 hover:shadow-indigo-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed border-0"
+                                className="flex w-full h-11 rounded-full bg-stone-900 px-3 text-sm font-semibold text-[#FFF7ED] border-0 shadow-[0_14px_28px_-14px_rgba(28,25,23,0.6)] hover:bg-[#C2410C] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {loading ? (
                                     <>
@@ -147,9 +146,14 @@ export default function SignIn() {
                         </div>
                     </form>
 
-                    <p className="mt-8 text-center text-sm text-gray-400">
-                        <Link href="/" className="font-medium text-indigo-400 hover:text-indigo-300 flex items-center justify-center gap-1 transition-colors">
-                            <ArrowLeft className="h-4 w-4" /> Back to Home
+                    <p className="mt-6 flex items-center justify-center gap-1.5 text-[13px] text-stone-500">
+                        <ShieldCheck className="h-4 w-4 text-[#C2410C]" />
+                        Protected by session monitoring &amp; encryption
+                    </p>
+
+                    <p className="mt-6 text-center text-sm text-stone-500">
+                        <Link href="/" className="inline-flex items-center gap-1.5 font-semibold text-[#9A3412] hover:text-[#C2410C] transition-colors">
+                            <ArrowLeft className="h-4 w-4" /> Back to home
                         </Link>
                     </p>
                 </div>

@@ -8,6 +8,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -232,13 +233,51 @@
 @utility reveal-delay-4 { transition-delay: 0.32s; }
 @utility reveal-delay-5 { transition-delay: 0.4s; }
 
-/* ---------- Navbar elevation on scroll ---------- */
+/* ---------- Navbar elevation on scroll (light editorial) ---------- */
 @utility nav-scrolled {
-  background: color-mix(in oklch, #0a0a0a 72%, transparent);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  backdrop-filter: blur(20px) saturate(180%);
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 32px -12px rgba(0, 0, 0, 0.6);
+  background: color-mix(in oklch, #fffdf9 86%, transparent);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+  border-color: rgba(28, 25, 23, 0.1);
+  box-shadow: 0 12px 32px -16px rgba(28, 25, 23, 0.25);
+}
+
+@utility nav-idle {
+  background: color-mix(in oklch, #fffdf9 72%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
+  border-color: rgba(28, 25, 23, 0.08);
+  box-shadow: 0 8px 24px -16px rgba(28, 25, 23, 0.18);
+}
+
+/* ---------- Light editorial surfaces ---------- */
+@utility paper-card {
+  background: #fffdf9;
+  border: 1px solid rgba(28, 25, 23, 0.09);
+  box-shadow:
+    0 1px 2px rgba(28, 25, 23, 0.05),
+    0 16px 40px -24px rgba(28, 25, 23, 0.22);
+}
+
+@utility paper-card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  &:hover {
+    transform: translateY(-4px);
+    border-color: rgba(194, 65, 12, 0.35);
+    box-shadow:
+      0 1px 2px rgba(28, 25, 23, 0.06),
+      0 24px 48px -20px rgba(194, 65, 12, 0.28);
+  }
+}
+
+@utility dot-grid-warm {
+  background-image: radial-gradient(circle at 1px 1px, rgba(28, 25, 23, 0.14) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+@utility rule-fade {
+  background: linear-gradient(to right, transparent, rgba(28, 25, 23, 0.14), transparent);
+  height: 1px;
 }
 
 @keyframes gradient-shift {
