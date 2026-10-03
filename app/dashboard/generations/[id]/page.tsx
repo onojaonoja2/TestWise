@@ -135,7 +135,7 @@ export default function ReviewGenerationPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <Loader2 className="h-8 w-8 text-indigo-600 animate-spin" />
+        <Loader2 className="h-8 w-8 text-[#C2410C] animate-spin" />
       </div>
     )
   }
@@ -143,8 +143,8 @@ export default function ReviewGenerationPage() {
   if (!generation) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Generation not found</p>
-        <Link href="/dashboard/documents" className="text-indigo-600 hover:text-indigo-800 mt-2 inline-block">
+        <p className="text-stone-500">Generation not found</p>
+        <Link href="/dashboard/documents" className="text-sm font-semibold text-[#9A3412] hover:text-[#C2410C] mt-2 inline-block transition-colors">
           Back to documents
         </Link>
       </div>
@@ -154,11 +154,11 @@ export default function ReviewGenerationPage() {
   if (generation.status === 'FAILED') {
     return (
       <div className="text-center py-12">
-        <h2 className="text-lg font-medium text-red-700 mb-2">Generation Failed</h2>
-        <p className="text-gray-500">The AI was unable to generate questions. Please try again.</p>
+        <h2 className="font-display text-lg font-semibold text-red-800 mb-2">Generation Failed</h2>
+        <p className="text-stone-500">The AI was unable to generate questions. Please try again.</p>
         <Link
           href={`/dashboard/documents/${generation.document.id}`}
-          className="text-indigo-600 hover:text-indigo-800 mt-4 inline-block"
+          className="text-sm font-semibold text-[#9A3412] hover:text-[#C2410C] mt-4 inline-block transition-colors"
         >
           Back to document
         </Link>
@@ -169,36 +169,38 @@ export default function ReviewGenerationPage() {
   if (generation.status === 'PROCESSING') {
     return (
       <div className="text-center py-12">
-        <Loader2 className="h-8 w-8 text-indigo-600 animate-spin mx-auto mb-4" />
-        <h2 className="text-lg font-medium text-gray-900 mb-2">Generating Questions...</h2>
-        <p className="text-gray-500">This should only take a moment.</p>
+        <Loader2 className="h-8 w-8 text-[#C2410C] animate-spin mx-auto mb-4" />
+        <h2 className="font-display text-lg font-semibold text-stone-900 mb-2">Generating Questions...</h2>
+        <p className="text-stone-500">This should only take a moment.</p>
       </div>
     )
   }
 
   const approvedCount = generation.questions.filter((q) => q.approved === true).length
+  const inputClass =
+    'w-full px-3.5 py-2.5 border border-stone-900/10 rounded-xl text-sm text-stone-900 bg-white placeholder:text-stone-400 focus:border-[#C2410C] focus:outline-none focus:ring-2 focus:ring-[#C2410C]/25 transition-all'
 
   return (
-    <div>
-      <div className="mb-6">
+    <div className="space-y-6">
+      <div>
         <Link
           href={`/dashboard/documents/${generation.document.id}`}
-          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4"
+          className="inline-flex items-center gap-1 text-sm font-medium text-stone-500 hover:text-[#C2410C] mb-4 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" /> Back to {generation.document.originalName}
         </Link>
 
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Review Questions</h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <h1 className="font-display text-2xl font-semibold text-stone-900">Review Questions</h1>
+            <p className="text-sm text-stone-500 mt-1">
               {generation.count} {generation.questionType.replace(/_/g, ' ').toLowerCase()} questions
               {' · '}
               {generation.difficulty} difficulty
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500">
+            <span className="rounded-full border border-stone-900/10 bg-white px-4 py-1.5 text-sm text-stone-500 shadow-sm">
               {generation.questions.filter((q) => q.approved === true).length} approved
               {' · '}
               {generation.questions.filter((q) => q.approved === false).length} rejected
@@ -210,19 +212,19 @@ export default function ReviewGenerationPage() {
       </div>
 
       {totalQuestions > 0 && currentQuestion && (
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="paper-card rounded-[1.75rem] p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-stone-500">
                 Question {currentIndex + 1} of {totalQuestions}
               </span>
               <span
-                className={`text-xs px-2 py-0.5 rounded-full ${
+                className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
                   currentQuestion.approved === true
-                    ? 'bg-green-100 text-green-700'
+                    ? 'bg-emerald-100 text-emerald-800'
                     : currentQuestion.approved === false
-                    ? 'bg-red-100 text-red-700'
-                    : 'bg-gray-100 text-gray-600'
+                    ? 'bg-red-100 text-red-800'
+                    : 'bg-stone-900/8 text-stone-600'
                 }`}
               >
                 {currentQuestion.approved === true
@@ -236,14 +238,14 @@ export default function ReviewGenerationPage() {
               <button
                 onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
                 disabled={currentIndex === 0}
-                className="p-1.5 text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                className="p-1.5 text-stone-400 hover:text-[#C2410C] disabled:opacity-30 transition-colors"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <button
                 onClick={() => setCurrentIndex((i) => Math.min(totalQuestions - 1, i + 1))}
                 disabled={currentIndex === totalQuestions - 1}
-                className="p-1.5 text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                className="p-1.5 text-stone-400 hover:text-[#C2410C] disabled:opacity-30 transition-colors"
               >
                 <ChevronRight className="h-5 w-5" />
               </button>
@@ -253,18 +255,18 @@ export default function ReviewGenerationPage() {
           {editing ? (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Question Text</label>
+                <label className="block text-sm font-semibold text-stone-900 mb-1">Question Text</label>
                 <textarea
                   value={editData?.text || ''}
                   onChange={(e) => setEditData((d) => ({ ...d, text: e.target.value }))}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500"
+                  className={inputClass}
                 />
               </div>
 
               {currentQuestion.type === 'MULTIPLE_CHOICE' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Options</label>
+                  <label className="block text-sm font-semibold text-stone-900 mb-1">Options</label>
                   {editData?.options?.map((opt, i) => (
                     <div key={i} className="flex items-center gap-2 mb-2">
                       <input
@@ -274,7 +276,7 @@ export default function ReviewGenerationPage() {
                           newOpts[i] = e.target.value
                           setEditData((d) => ({ ...d, options: newOpts }))
                         }}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500"
+                        className={inputClass}
                       />
                     </div>
                   ))}
@@ -282,36 +284,36 @@ export default function ReviewGenerationPage() {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Correct Answer</label>
+                <label className="block text-sm font-semibold text-stone-900 mb-1">Correct Answer</label>
                 <input
                   value={editData?.correctAnswer || ''}
                   onChange={(e) => setEditData((d) => ({ ...d, correctAnswer: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500"
+                  className={inputClass}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Explanation</label>
+                <label className="block text-sm font-semibold text-stone-900 mb-1">Explanation</label>
                 <textarea
                   value={editData?.explanation || ''}
                   onChange={(e) => setEditData((d) => ({ ...d, explanation: e.target.value }))}
                   rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500"
+                  className={inputClass}
                 />
               </div>
 
-              <div className="flex items-center gap-3 pt-2">
+              <div className="flex items-center gap-4 pt-2">
                 <button
                   onClick={saveEdit}
                   disabled={saving}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-900 text-[#FFF7ED] rounded-full hover:bg-[#C2410C] disabled:opacity-50 text-sm font-semibold transition-colors"
                 >
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                   Save
                 </button>
                 <button
                   onClick={() => setEditing(false)}
-                  className="text-sm text-gray-500 hover:text-gray-700"
+                  className="text-sm font-medium text-stone-500 hover:text-[#C2410C] transition-colors"
                 >
                   Cancel
                 </button>
@@ -320,26 +322,26 @@ export default function ReviewGenerationPage() {
           ) : (
             <div className="space-y-6">
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-2">Question</h3>
-                <p className="text-lg text-gray-900">{currentQuestion.text}</p>
+                <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-stone-400 mb-2">Question</h3>
+                <p className="font-display text-lg font-medium text-stone-900">{currentQuestion.text}</p>
               </div>
 
               {currentQuestion.options && currentQuestion.options.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">Options</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-stone-400 mb-2">Options</h3>
                   <div className="space-y-2">
                     {currentQuestion.options.map((opt, i) => (
                       <div
                         key={i}
-                        className={`px-4 py-2.5 rounded-lg border text-sm ${
+                        className={`px-4 py-2.5 rounded-xl border text-sm ${
                           opt === currentQuestion.correctAnswer
-                            ? 'border-green-300 bg-green-50 text-green-800'
-                            : 'border-gray-200 text-gray-700'
+                            ? 'border-emerald-300 bg-emerald-50 text-emerald-900'
+                            : 'border-stone-900/10 bg-[#FAF7F1] text-stone-700'
                         }`}
                       >
                         {opt}
                         {opt === currentQuestion.correctAnswer && (
-                          <Check className="h-4 w-4 inline ml-2 text-green-600" />
+                          <Check className="h-4 w-4 inline ml-2 text-emerald-600" />
                         )}
                       </div>
                     ))}
@@ -349,28 +351,28 @@ export default function ReviewGenerationPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-1">Correct Answer</h3>
-                  <p className="text-sm font-medium text-green-700">{currentQuestion.correctAnswer}</p>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-stone-400 mb-1">Correct Answer</h3>
+                  <p className="text-sm font-semibold text-emerald-800">{currentQuestion.correctAnswer}</p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-1">Points</h3>
-                  <p className="text-sm text-gray-900">{currentQuestion.points}</p>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-stone-400 mb-1">Points</h3>
+                  <p className="text-sm font-semibold text-stone-900">{currentQuestion.points}</p>
                 </div>
               </div>
 
               {currentQuestion.explanation && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-1">Explanation</h3>
-                  <p className="text-sm text-gray-700 bg-gray-50 rounded-lg p-3">
+                  <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-stone-400 mb-1">Explanation</h3>
+                  <p className="text-sm text-stone-700 bg-[#FAF7F1] border border-stone-900/8 rounded-xl p-3">
                     {currentQuestion.explanation}
                   </p>
                 </div>
               )}
 
-              <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
+              <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-stone-900/10">
                 <button
                   onClick={startEditing}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-stone-900 bg-white border border-stone-900/10 rounded-full hover:bg-[#FAF7F1] transition-colors"
                 >
                   <Edit3 className="h-4 w-4" />
                   Edit
@@ -379,7 +381,7 @@ export default function ReviewGenerationPage() {
                   <button
                     onClick={() => setApproved(true)}
                     disabled={saving}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-emerald-700 rounded-full hover:bg-emerald-800 disabled:opacity-50 transition-colors"
                   >
                     <Check className="h-4 w-4" />
                     Approve
@@ -389,7 +391,7 @@ export default function ReviewGenerationPage() {
                   <button
                     onClick={() => setApproved(false)}
                     disabled={saving}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 disabled:opacity-50"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-full hover:bg-red-700 disabled:opacity-50 transition-colors"
                   >
                     <X className="h-4 w-4" />
                     Reject
@@ -402,10 +404,10 @@ export default function ReviewGenerationPage() {
       )}
 
       {totalQuestions > 0 && (
-        <div className="mt-8 flex justify-center">
+        <div className="mt-2 flex justify-center">
           <Link
             href={`/dashboard/generations/${params.id}/apply`}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-lg font-medium"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-stone-900 text-[#FFF7ED] rounded-full hover:bg-[#C2410C] transition-colors text-base font-semibold shadow-[0_14px_28px_-14px_rgba(28,25,23,0.6)]"
           >
             <CheckSquare className="h-5 w-5" />
             Apply Approved Questions to Test

@@ -235,29 +235,29 @@ export default function DocumentChatPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <Loader2 className="h-8 w-8 text-indigo-600 animate-spin" />
+        <Loader2 className="h-8 w-8 text-[#C2410C] animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col">
-      <div className="mb-4">
+    <div className="h-[calc(100vh-8rem)] flex flex-col space-y-4">
+      <div>
         <Link
           href={`/dashboard/documents/${params.id}`}
-          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4"
+          className="inline-flex items-center gap-1 text-sm font-medium text-stone-500 hover:text-[#C2410C] mb-4 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" /> Back to document
         </Link>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Chat with Document</h1>
-            <p className="text-sm text-gray-500">{doc?.originalName}</p>
+            <h1 className="font-display text-2xl font-semibold text-stone-900">Chat with Document</h1>
+            <p className="text-sm text-stone-500">{doc?.originalName}</p>
           </div>
           {doc?.status === 'READY' && (
             <button
               onClick={createNewConversation}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-900 text-[#FFF7ED] rounded-full hover:bg-[#C2410C] transition-colors text-sm font-semibold shadow-[0_14px_28px_-14px_rgba(28,25,23,0.6)]"
             >
               <Plus className="h-4 w-4" />
               New Chat
@@ -267,24 +267,24 @@ export default function DocumentChatPage() {
       </div>
 
       {doc?.status !== 'READY' && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-          <p className="text-yellow-800 text-sm">
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+          <p className="text-amber-900 text-sm">
             Document is still processing. Please wait until processing is complete to start chatting.
           </p>
         </div>
       )}
 
       <div className="flex-1 flex gap-4 min-h-0">
-        <div className="w-64 bg-white rounded-xl border border-gray-200 flex flex-col">
-          <div className="p-4 border-b border-gray-200">
-            <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
+        <div className="w-64 paper-card rounded-[1.5rem] flex flex-col overflow-hidden">
+          <div className="p-4 border-b border-stone-900/10">
+            <h2 className="font-display font-semibold text-stone-900 flex items-center gap-2">
+              <MessageSquare className="h-4 w-4 text-[#C2410C]" />
               Conversations
             </h2>
           </div>
           <div className="flex-1 overflow-y-auto p-2">
             {conversations.length === 0 ? (
-              <p className="text-sm text-gray-500 text-center py-8">
+              <p className="text-sm text-stone-500 text-center py-8 px-2">
                 No conversations yet. Start chatting to create one.
               </p>
             ) : (
@@ -293,22 +293,22 @@ export default function DocumentChatPage() {
 <li key={conv.id}>
                   <div
                     onClick={() => loadConversation(conv.id)}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors group cursor-pointer ${
+                    className={`w-full text-left px-3 py-2 rounded-xl transition-colors group cursor-pointer ${
                       activeConversation?.id === conv.id
-                        ? 'bg-indigo-100 text-indigo-900'
-                        : 'hover:bg-gray-100'
+                        ? 'bg-[#C2410C]/10 text-stone-900 border border-[#C2410C]/25'
+                        : 'hover:bg-[#FAF7F1] border border-transparent'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium truncate">{conv.title}</span>
+                      <span className="text-sm font-semibold truncate">{conv.title}</span>
                       <button
                         onClick={(e) => deleteConversation(conv.id, e)}
-                        className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 p-1"
+                        className="opacity-0 group-hover:opacity-100 text-stone-400 hover:text-red-600 p-1 transition-all"
                       >
                         <Trash2 className="h-3 w-3" />
                       </button>
                     </div>
-                    <span className="text-xs text-gray-500">{formatTime(conv.updatedAt)}</span>
+                    <span className="text-xs text-stone-500">{formatTime(conv.updatedAt)}</span>
                   </div>
                 </li>
                 ))}
@@ -317,17 +317,17 @@ export default function DocumentChatPage() {
           </div>
         </div>
 
-        <div className="flex-1 bg-white rounded-xl border border-gray-200 flex flex-col min-h-0">
+        <div className="flex-1 paper-card rounded-[1.5rem] flex flex-col min-h-0 overflow-hidden">
           {activeConversation ? (
             <>
-              <div className="p-4 border-b border-gray-200">
-                <h2 className="font-semibold text-gray-900">{activeConversation.title}</h2>
+              <div className="p-4 border-b border-stone-900/10">
+                <h2 className="font-display font-semibold text-stone-900">{activeConversation.title}</h2>
               </div>
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#FAF7F1]/50">
                 {messages.length === 0 && !sending ? (
                   <div className="text-center py-12">
-                    <MessageSquare className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">
+                    <MessageSquare className="h-12 w-12 text-stone-300 mx-auto mb-4" />
+                    <p className="text-stone-500">
                       Start a conversation about the document
                     </p>
                   </div>
@@ -340,13 +340,13 @@ export default function DocumentChatPage() {
                       <div
                         className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                           msg.role === 'USER'
-                            ? 'bg-indigo-600 text-white'
-                            : 'bg-gray-100 text-gray-900'
+                            ? 'bg-stone-900 text-[#FFF7ED]'
+                            : 'bg-white border border-stone-900/10 text-stone-900 shadow-sm'
                         }`}
                       >
-                        <p className="whitespace-pre-wrap">{msg.content || (msg.id.startsWith('temp-assistant') && sending ? 'Typing...' : '')}</p>
+                        <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.content || (msg.id.startsWith('temp-assistant') && sending ? 'Typing...' : '')}</p>
                         {msg.role === 'USER' && (
-                          <p className="text-xs mt-1 text-indigo-200">
+                          <p className="text-xs mt-1 text-stone-400">
                             {formatTime(msg.createdAt)}
                           </p>
                         )}
@@ -357,7 +357,7 @@ export default function DocumentChatPage() {
                 <div ref={messagesEndRef} />
               </div>
               {doc?.status === 'READY' && (
-                <form onSubmit={sendMessage} className="p-4 border-t border-gray-200">
+                <form onSubmit={sendMessage} className="p-4 border-t border-stone-900/10 bg-white">
                   <div className="flex gap-2">
                     <textarea
                       ref={inputRef}
@@ -372,12 +372,12 @@ export default function DocumentChatPage() {
                       placeholder="Ask a question about the document..."
                       disabled={sending}
                       rows={1}
-                      className="flex-1 resize-none rounded-lg border border-gray-300 px-4 py-2 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
+                      className="flex-1 resize-none rounded-xl border border-stone-900/10 bg-[#FAF7F1] px-4 py-2.5 text-stone-900 placeholder:text-stone-400 focus:border-[#C2410C] focus:outline-none focus:ring-2 focus:ring-[#C2410C]/25 disabled:opacity-50 text-sm transition-all"
                     />
                     <button
                       type="submit"
                       disabled={!input.trim() || sending}
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="px-4 py-2 bg-stone-900 text-[#FFF7ED] rounded-full hover:bg-[#C2410C] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       {sending ? (
                         <Loader2 className="h-5 w-5 animate-spin" />
@@ -392,17 +392,17 @@ export default function DocumentChatPage() {
           ) : (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
-                <MessageSquare className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                <MessageSquare className="h-16 w-16 text-stone-300 mx-auto mb-4" />
+                <h3 className="font-display text-lg font-semibold text-stone-900 mb-2">
                   Select or start a conversation
                 </h3>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-sm text-stone-500 mb-4">
                   Ask questions about the document content
                 </p>
                 <button
                   onClick={createNewConversation}
                   disabled={doc?.status !== 'READY'}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-900 text-[#FFF7ED] rounded-full hover:bg-[#C2410C] disabled:opacity-50 transition-colors text-sm font-semibold"
                 >
                   <Plus className="h-4 w-4" />
                   Start New Chat
@@ -414,9 +414,9 @@ export default function DocumentChatPage() {
       </div>
 
       {error && (
-        <div className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg">
+        <div className="fixed bottom-4 right-4 bg-stone-900 text-[#FFF7ED] px-4 py-3 rounded-2xl shadow-xl border border-stone-900/10">
           <p className="text-sm">{error}</p>
-          <button onClick={() => setError(null)} className="text-xs underline mt-1">
+          <button onClick={() => setError(null)} className="text-xs font-semibold underline mt-1 text-[#E7A06B] hover:text-white">
             Dismiss
           </button>
         </div>

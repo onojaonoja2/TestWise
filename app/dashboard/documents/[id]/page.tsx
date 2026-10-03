@@ -71,7 +71,7 @@ export default function DocumentDetailPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <Loader2 className="h-8 w-8 text-indigo-600 animate-spin" />
+        <Loader2 className="h-8 w-8 text-[#C2410C] animate-spin" />
       </div>
     )
   }
@@ -80,11 +80,11 @@ export default function DocumentDetailPage() {
     return (
       <div className="text-center py-12">
         <XCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Error</h3>
-        <p className="text-sm text-gray-500">{error || 'Document not found'}</p>
+        <h3 className="font-display text-lg font-semibold text-stone-900 mb-2">Error</h3>
+        <p className="text-sm text-stone-500">{error || 'Document not found'}</p>
         <Link
           href="/dashboard/documents"
-          className="mt-4 inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800"
+          className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#9A3412] hover:text-[#C2410C] transition-colors"
         >
           <ArrowLeft className="h-4 w-4" /> Back to documents
         </Link>
@@ -93,34 +93,34 @@ export default function DocumentDetailPage() {
   }
 
   return (
-    <div>
-      <div className="mb-6">
+    <div className="space-y-6">
+      <div>
         <Link
           href="/dashboard/documents"
-          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4"
+          className="inline-flex items-center gap-1 text-sm font-medium text-stone-500 hover:text-[#C2410C] mb-4 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" /> Back to documents
         </Link>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{doc.originalName}</h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <h1 className="font-display text-2xl font-semibold text-stone-900">{doc.originalName}</h1>
+            <p className="text-sm text-stone-500 mt-1">
               {formatSize(doc.size)} · {doc.mimeType} · Uploaded {formatDate(doc.createdAt)}
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             {doc.status === 'READY' && (
               <>
                 <Link
                   href={`/dashboard/documents/${doc.id}/chat`}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-900 text-[#FFF7ED] rounded-full hover:bg-[#C2410C] transition-colors text-sm font-semibold shadow-[0_14px_28px_-14px_rgba(28,25,23,0.6)]"
                 >
                   <MessageSquare className="h-4 w-4" />
                   Chat with Document
                 </Link>
                 <Link
                   href={`/dashboard/documents/${doc.id}/generate`}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#C2410C] text-white rounded-full hover:bg-[#9A3412] transition-colors text-sm font-semibold shadow-[0_14px_28px_-14px_rgba(194,65,12,0.7)]"
                 >
                   <Zap className="h-4 w-4" />
                   Generate Questions
@@ -128,13 +128,13 @@ export default function DocumentDetailPage() {
               </>
             )}
             {doc.status === 'PROCESSING' && (
-              <span className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg">
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-amber-100 text-amber-900 rounded-full text-sm font-medium">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Processing...
               </span>
             )}
             {doc.status === 'FAILED' && (
-              <span className="inline-flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg">
+              <span className="inline-flex items-center gap-2 px-4 py-2 bg-red-100 text-red-800 rounded-full text-sm font-medium">
                 <XCircle className="h-4 w-4" />
                 Processing Failed
               </span>
@@ -143,82 +143,82 @@ export default function DocumentDetailPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Status</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="paper-card rounded-2xl p-5">
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-400 mb-2">Status</p>
           <div className="flex items-center gap-2">
             {doc.status === 'READY' && (
               <>
-                <CheckCircle className="h-5 w-5 text-green-500" />
-                <span className="font-medium text-green-700">Ready</span>
+                <CheckCircle className="h-5 w-5 text-emerald-600" />
+                <span className="font-semibold text-emerald-800">Ready</span>
               </>
             )}
             {doc.status === 'PROCESSING' && (
               <>
-                <Loader2 className="h-5 w-5 text-yellow-500 animate-spin" />
-                <span className="font-medium text-yellow-700">Processing</span>
+                <Loader2 className="h-5 w-5 text-amber-600 animate-spin" />
+                <span className="font-semibold text-amber-800">Processing</span>
               </>
             )}
             {doc.status === 'FAILED' && (
               <>
                 <XCircle className="h-5 w-5 text-red-500" />
-                <span className="font-medium text-red-700">Failed</span>
+                <span className="font-semibold text-red-800">Failed</span>
               </>
             )}
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Conversations</p>
-          <p className="text-2xl font-bold text-gray-900">{doc._count.conversations}</p>
+        <div className="paper-card rounded-2xl p-5">
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-400 mb-1">Conversations</p>
+          <p className="font-display text-2xl font-semibold text-stone-900">{doc._count.conversations}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Generations</p>
-          <p className="text-2xl font-bold text-gray-900">{doc._count.generations}</p>
+        <div className="paper-card rounded-2xl p-5">
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-400 mb-1">Generations</p>
+          <p className="font-display text-2xl font-semibold text-stone-900">{doc._count.generations}</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Generation History</h2>
+      <div className="paper-card rounded-[1.5rem] overflow-hidden">
+        <div className="px-6 py-4 border-b border-stone-900/10">
+          <h2 className="font-display text-lg font-semibold text-stone-900">Generation History</h2>
         </div>
         {doc.generations.length === 0 ? (
           <div className="text-center py-8">
-            <FileText className="h-8 w-8 text-gray-400 mx-auto mb-3" />
-            <p className="text-sm text-gray-500">No generations yet</p>
+            <FileText className="h-8 w-8 text-stone-300 mx-auto mb-3" />
+            <p className="text-sm text-stone-500">No generations yet</p>
           </div>
         ) : (
-          <ul role="list" className="divide-y divide-gray-200">
+          <ul role="list" className="divide-y divide-stone-900/8">
             {doc.generations.map((gen) => (
               <li key={gen.id}>
                 <Link
                   href={`/dashboard/generations/${gen.id}`}
-                  className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-between px-6 py-4 hover:bg-[#FAF7F1] transition-colors"
                 >
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-semibold text-stone-900">
                       {gen.count} {gen.questionType.replace(/_/g, ' ').toLowerCase()} questions
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-stone-500 mt-1">
                       {formatDate(gen.createdAt)} · {gen._count.questions} questions generated
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
                     {gen.status === 'COMPLETED' && (
-                      <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                      <span className="text-xs px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full font-semibold">
                         Completed
                       </span>
                     )}
                     {gen.status === 'PROCESSING' && (
-                      <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full">
+                      <span className="text-xs px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full font-semibold">
                         Processing
                       </span>
                     )}
                     {gen.status === 'FAILED' && (
-                      <span className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded-full">
+                      <span className="text-xs px-2.5 py-1 bg-red-100 text-red-800 rounded-full font-semibold">
                         Failed
                       </span>
                     )}
-                    <ChevronRight className="h-4 w-4 text-gray-400" />
+                    <ChevronRight className="h-4 w-4 text-stone-400" />
                   </div>
                 </Link>
               </li>

@@ -194,24 +194,24 @@ export default function DocumentsPage() {
       case 'READY':
         return <CheckCircle className="h-5 w-5 text-green-500" />
       case 'PROCESSING':
-        return <Loader2 className="h-5 w-5 text-yellow-500 animate-spin" />
+        return <Loader2 className="h-5 w-5 text-amber-600 animate-spin" />
       case 'FAILED':
         return <XCircle className="h-5 w-5 text-red-500" />
       default:
-        return <Clock className="h-5 w-5 text-gray-400" />
+        return <Clock className="h-5 w-5 text-stone-400" />
     }
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Documents</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="font-display text-2xl font-semibold text-stone-900">Documents</h1>
+          <p className="text-sm text-stone-500 mt-1">
             Upload educational materials to generate questions
           </p>
         </div>
-        <label className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer transition-colors disabled:opacity-50">
+        <label className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-900 text-[#FFF7ED] rounded-full hover:bg-[#C2410C] cursor-pointer transition-colors disabled:opacity-50 text-sm font-semibold shadow-[0_14px_28px_-14px_rgba(28,25,23,0.6)]">
           <Upload className="h-4 w-4" />
           {uploading ? 'Uploading...' : 'Upload Document'}
           <input
@@ -225,9 +225,9 @@ export default function DocumentsPage() {
       </div>
 
       {uploading && (
-        <div className="flex items-center gap-3 p-4 mb-6 bg-indigo-50 border border-indigo-200 rounded-lg">
-          <Loader2 className="h-5 w-5 text-indigo-600 animate-spin" />
-          <span className="text-sm text-indigo-700">
+        <div className="flex items-center gap-3 p-4 bg-[#FFF7ED] border border-[#C2410C]/25 rounded-2xl">
+          <Loader2 className="h-5 w-5 text-[#C2410C] animate-spin" />
+          <span className="text-sm text-[#9A3412]">
             Processing document... This may take a moment.
           </span>
         </div>
@@ -235,16 +235,16 @@ export default function DocumentsPage() {
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <Loader2 className="h-8 w-8 text-indigo-600 animate-spin" />
+          <Loader2 className="h-8 w-8 text-[#C2410C] animate-spin" />
         </div>
       ) : documents.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
-          <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No documents yet</h3>
-          <p className="text-sm text-gray-500 mb-4">
+        <div className="paper-card text-center py-12 rounded-[1.75rem]">
+          <FileText className="h-12 w-12 text-stone-300 mx-auto mb-4" />
+          <h3 className="font-display text-lg font-semibold text-stone-900 mb-2">No documents yet</h3>
+          <p className="text-sm text-stone-500 mb-4">
             Upload a PDF, DOCX, or TXT file to get started
           </p>
-          <label className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer">
+          <label className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-900 text-[#FFF7ED] rounded-full hover:bg-[#C2410C] cursor-pointer text-sm font-semibold transition-colors">
             <Upload className="h-4 w-4" />
             Upload your first document
             <input
@@ -256,35 +256,35 @@ export default function DocumentsPage() {
           </label>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <ul role="list" className="divide-y divide-gray-200">
+        <div className="paper-card rounded-[1.5rem] overflow-hidden">
+          <ul role="list" className="divide-y divide-stone-900/8">
             {documents.map((doc) => (
               <li key={doc.id}>
-                <div className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 transition-colors">
+                <div className="flex items-center gap-4 px-6 py-4 hover:bg-[#FAF7F1] transition-colors">
                   <div className="flex-shrink-0">{statusIcon(doc.status)}</div>
                   <div className="flex-1 min-w-0">
                     <Link
                       href={`/dashboard/documents/${doc.id}`}
-                      className="text-sm font-medium text-indigo-600 hover:text-indigo-800 truncate block"
+                      className="text-sm font-semibold text-[#9A3412] hover:text-[#C2410C] truncate block transition-colors"
                     >
                       {doc.originalName}
                     </Link>
                     <div className="flex items-center gap-3 mt-1">
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-stone-500">
                         {formatSize(doc.size)}
                       </span>
-                      <span className="text-xs text-gray-400">·</span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-stone-300">·</span>
+                      <span className="text-xs text-stone-500">
                         {formatDate(doc.createdAt)}
                       </span>
-                      <span className="text-xs text-gray-400">·</span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-stone-300">·</span>
+                      <span className="text-xs text-stone-500">
                         {doc._count.chunks} chunks
                       </span>
                       {doc._count.generations > 0 && (
                         <>
-                          <span className="text-xs text-gray-400">·</span>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-stone-300">·</span>
+                          <span className="text-xs text-stone-500">
                             {doc._count.generations} generations
                           </span>
                         </>
@@ -293,7 +293,7 @@ export default function DocumentsPage() {
                   </div>
                   <button
                     onClick={() => handleDelete(doc.id, doc.originalName)}
-                    className="flex-shrink-0 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    className="flex-shrink-0 p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
                     title="Delete document"
                   >
                     <Trash2 className="h-4 w-4" />

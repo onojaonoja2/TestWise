@@ -17,7 +17,7 @@ export default function BackButton({ href, label = "Back", className = "" }: Bac
         return (
             <Link
                 href={href}
-                className={`inline-flex items-center text-sm text-gray-500 hover:text-gray-700 ${className}`}
+                className={`inline-flex items-center text-sm font-medium text-stone-500 hover:text-[#9A3412] transition-colors ${className}`}
             >
                 <ArrowLeft className="mr-1 h-4 w-4" />
                 {label}
@@ -28,7 +28,7 @@ export default function BackButton({ href, label = "Back", className = "" }: Bac
     return (
         <button
             onClick={() => router.back()}
-            className={`inline-flex items-center text-sm text-gray-500 hover:text-gray-700 ${className}`}
+            className={`inline-flex items-center text-sm font-medium text-stone-500 hover:text-[#9A3412] transition-colors ${className}`}
         >
             <ArrowLeft className="mr-1 h-4 w-4" />
             {label}

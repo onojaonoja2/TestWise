@@ -43,19 +43,19 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const getIcon = (type: ToastType) => {
     switch (type) {
-      case 'success': return <CheckCircle className="h-5 w-5 text-green-500" />
-      case 'error': return <AlertCircle className="h-5 w-5 text-red-500" />
-      case 'warning': return <AlertTriangle className="h-5 w-5 text-yellow-500" />
-      default: return <Info className="h-5 w-5 text-blue-500" />
+      case 'success': return <CheckCircle className="h-5 w-5 shrink-0 text-emerald-600" />
+      case 'error': return <AlertCircle className="h-5 w-5 shrink-0 text-red-500" />
+      case 'warning': return <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600" />
+      default: return <Info className="h-5 w-5 shrink-0 text-[#C2410C]" />
     }
   }
 
   const getStyles = (type: ToastType) => {
     switch (type) {
-      case 'success': return 'bg-green-50 border-green-200 text-green-800'
-      case 'error': return 'bg-red-50 border-red-200 text-red-800'
-      case 'warning': return 'bg-yellow-50 border-yellow-200 text-yellow-800'
-      default: return 'bg-blue-50 border-blue-200 text-blue-800'
+      case 'success': return 'bg-[#FFFDF9] border-emerald-200 text-stone-900'
+      case 'error': return 'bg-[#FFFDF9] border-red-200 text-stone-900'
+      case 'warning': return 'bg-[#FFFDF9] border-amber-200 text-stone-900'
+      default: return 'bg-[#FFFDF9] border-stone-900/10 text-stone-900'
     }
   }
 
@@ -66,14 +66,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg ${getStyles(toast.type)} animate-in slide-in-from-right`}
+            className={`flex items-center gap-3 px-4 py-3 rounded-2xl border shadow-[0_16px_40px_-24px_rgba(28,25,23,0.4)] ${getStyles(toast.type)} animate-in slide-in-from-right`}
             style={{ minWidth: '300px', maxWidth: '400px' }}
           >
             {getIcon(toast.type)}
             <p className="flex-1 text-sm font-medium">{toast.message}</p>
             <button
               onClick={() => removeToast(toast.id)}
-              className="opacity-60 hover:opacity-100"
+              className="text-stone-400 opacity-60 hover:opacity-100 hover:text-stone-700 transition-all"
             >
               <X className="h-4 w-4" />
             </button>

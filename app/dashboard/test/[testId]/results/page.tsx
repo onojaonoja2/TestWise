@@ -34,7 +34,7 @@ export default async function TestResultsPage({ params }: { params: Promise<{ te
     }
 
     if (!hasAccess) {
-        return <div>Unauthorized</div>
+        return <div className="p-8 text-center text-stone-500">Unauthorized</div>
     }
 
     const test = await prisma.test.findUnique({
@@ -55,114 +55,113 @@ export default async function TestResultsPage({ params }: { params: Promise<{ te
     })
 
     if (!test) {
-        return <div>Test not found</div>
+        return <div className="p-8 text-center text-stone-500">Test not found</div>
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="mb-8">
-                    <BackButton href="/dashboard" label="Back to Dashboard" className="mb-4" />
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="mt-2 text-2xl font-bold text-gray-900">{test.title} - Class Results</h1>
+        <div className="space-y-6">
+            <div>
+                <BackButton href="/dashboard" label="Back to Dashboard" className="mb-4" />
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <h1 className="font-display mt-2 text-2xl font-semibold text-stone-900">{test.title} - Class Results</h1>
+                        <p className="mt-1 text-sm text-stone-500">Per-student scores, warnings, and submission detail.</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <div className="text-sm text-stone-500">
+                            Total Submissions: <span className="font-semibold text-stone-900">{test.submissions.length}</span>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <div className="text-sm text-gray-500">
-                                Total Submissions: {test.submissions.length}
-                            </div>
-                            <a
-                                href={`/api/tests/${testId}/export`}
-                                className="inline-flex items-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
-                            >
-                                Export to Excel
-                            </a>
-                        </div>
+                        <a
+                            href={`/api/tests/${testId}/export`}
+                            className="inline-flex items-center rounded-full bg-stone-900 px-4 py-2 text-sm font-semibold text-[#FFF7ED] shadow-[0_14px_28px_-14px_rgba(28,25,23,0.6)] hover:bg-[#C2410C] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C2410C] transition-colors"
+                        >
+                            Export to Excel
+                        </a>
                     </div>
                 </div>
+            </div>
 
-                <div className="overflow-x-auto rounded-lg bg-white shadow">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                    Student
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                    Bio Data
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                    Score
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                    Warnings
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                    Submitted At
-                                </th>
-                                <th scope="col" className="relative px-6 py-3">
-                                    <span className="sr-only">View</span>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200 bg-white">
-                            {test.submissions.map((submission) => (
-                                <tr key={submission.id}>
-                                    <td className="whitespace-nowrap px-6 py-4">
-                                        <div className="flex items-center">
-                                            <div className="h-10 w-10 flex-shrink-0">
-                                                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-gray-500">
-                                                    <span className="font-medium leading-none text-white">
-                                                        {submission.student?.name?.[0] || submission.student?.email?.[0]?.toUpperCase() || '?'}
-                                                    </span>
+            <div className="paper-card overflow-x-auto rounded-[1.5rem]">
+                <table className="min-w-full divide-y divide-stone-900/8">
+                    <thead className="bg-[#FAF7F1]">
+                        <tr>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-stone-500">
+                                Student
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-stone-500">
+                                Bio Data
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-stone-500">
+                                Score
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-stone-500">
+                                Warnings
+                            </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-stone-500">
+                                Submitted At
+                            </th>
+                            <th scope="col" className="relative px-6 py-3">
+                                <span className="sr-only">View</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-stone-900/8 bg-white">
+                        {test.submissions.map((submission) => (
+                            <tr key={submission.id} className="hover:bg-[#FAF7F1] transition-colors">
+                                <td className="whitespace-nowrap px-6 py-4">
+                                    <div className="flex items-center">
+                                        <div className="h-10 w-10 flex-shrink-0">
+                                            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-stone-900">
+                                                <span className="font-semibold leading-none text-[#FFF7ED]">
+                                                    {submission.student?.name?.[0] || submission.student?.email?.[0]?.toUpperCase() || '?'}
                                                 </span>
-                                            </div>
-                                            <div className="ml-4">
-                                                <div className="text-sm font-medium text-gray-900">{submission.student?.name || 'Unknown Student'}</div>
-                                                <div className="text-sm text-gray-500">{submission.student?.email || 'No Email'}</div>
-                                            </div>
+                                            </span>
                                         </div>
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                                        {submission.bioData ? (
-                                            <div className="flex flex-col">
-                                                {Object.entries(submission.bioData as Record<string, string | number>).map(([key, value]) => (
-                                                    <span key={key} className="text-xs">
-                                                        <span className="font-semibold">{key}:</span> {value}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <span className="text-gray-400 italic">N/A</span>
-                                        )}
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4">
-                                        <div className="text-sm text-gray-900 font-semibold">{submission.score}</div>
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4">
-                                        {submission.currentWarnings > 0 ? (
-                                            <span className="inline-flex rounded-full bg-red-100 px-2 text-xs font-semibold leading-5 text-red-800">
-                                                {submission.currentWarnings}
-                                            </span>
-                                        ) : (
-                                            <span className="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">
-                                                0
-                                            </span>
-                                        )}
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                                        {new Date(submission.endTime || '').toLocaleString()}
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                                        <Link href={`/dashboard/results/${submission.id}`} className="text-indigo-600 hover:text-indigo-900">
-                                            View Details
-                                        </Link>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                                        <div className="ml-4">
+                                            <div className="text-sm font-semibold text-stone-900">{submission.student?.name || 'Unknown Student'}</div>
+                                            <div className="text-sm text-stone-500">{submission.student?.email || 'No Email'}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td className="whitespace-nowrap px-6 py-4 text-sm text-stone-500">
+                                    {submission.bioData ? (
+                                        <div className="flex flex-col">
+                                            {Object.entries(submission.bioData as Record<string, string | number>).map(([key, value]) => (
+                                                <span key={key} className="text-xs">
+                                                    <span className="font-semibold text-stone-700">{key}:</span> {value}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <span className="text-stone-400 italic">N/A</span>
+                                    )}
+                                </td>
+                                <td className="whitespace-nowrap px-6 py-4">
+                                    <div className="text-sm text-stone-900 font-semibold">{submission.score}</div>
+                                </td>
+                                <td className="whitespace-nowrap px-6 py-4">
+                                    {submission.currentWarnings > 0 ? (
+                                        <span className="inline-flex rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold leading-5 text-red-800">
+                                            {submission.currentWarnings}
+                                        </span>
+                                    ) : (
+                                        <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold leading-5 text-emerald-800">
+                                            0
+                                        </span>
+                                    )}
+                                </td>
+                                <td className="whitespace-nowrap px-6 py-4 text-sm text-stone-500">
+                                    {new Date(submission.endTime || '').toLocaleString()}
+                                </td>
+                                <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-semibold">
+                                    <Link href={`/dashboard/results/${submission.id}`} className="text-[#9A3412] hover:text-[#C2410C] transition-colors">
+                                        View Details
+                                    </Link>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
         </div>
     )

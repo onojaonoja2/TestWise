@@ -89,33 +89,45 @@ export function ModalProvider({ children }: { children: ReactNode }) {
   const getIcon = () => {
     switch (modal.typeColor) {
       case 'danger':
-        return <X className="h-6 w-6 text-red-500" />
+        return (
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-600/10">
+            <X className="h-6 w-6 text-red-600" />
+          </span>
+        )
       case 'warning':
-        return <AlertTriangle className="h-6 w-6 text-yellow-500" />
+        return (
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#C2410C]/10">
+            <AlertTriangle className="h-6 w-6 text-[#C2410C]" />
+          </span>
+        )
       default:
-        return <Info className="h-6 w-6 text-blue-500" />
+        return (
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-stone-900">
+            <Info className="h-6 w-6 text-[#FFF7ED]" />
+          </span>
+        )
     }
   }
 
-  const getStyles = () => {
+  const getHeaderStyles = () => {
     switch (modal.typeColor) {
       case 'danger':
-        return 'border-red-200 bg-red-50'
+        return 'bg-red-50/60 border-red-100'
       case 'warning':
-        return 'border-yellow-200 bg-yellow-50'
+        return 'bg-[#FFF7ED] border-[#C2410C]/15'
       default:
-        return 'border-blue-200 bg-blue-50'
+        return 'bg-[#FAF7F1] border-stone-900/10'
     }
   }
 
   const getButtonStyles = () => {
     switch (modal.typeColor) {
       case 'danger':
-        return 'bg-red-600 hover:bg-red-700 text-white'
+        return 'bg-red-600 hover:bg-red-700 text-white shadow-[0_14px_28px_-14px_rgba(220,38,38,0.7)]'
       case 'warning':
-        return 'bg-yellow-600 hover:bg-yellow-700 text-white'
+        return 'bg-[#C2410C] hover:bg-[#9A3412] text-white shadow-[0_14px_28px_-14px_rgba(194,65,12,0.7)]'
       default:
-        return 'bg-blue-600 hover:bg-blue-700 text-white'
+        return 'bg-stone-900 hover:bg-[#C2410C] text-[#FFF7ED] shadow-[0_14px_28px_-14px_rgba(28,25,23,0.6)]'
     }
   }
 
@@ -125,31 +137,31 @@ export function ModalProvider({ children }: { children: ReactNode }) {
       {modal.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 bg-stone-900/50 backdrop-blur-sm"
             onClick={() => modal.type === 'confirm' && closeModal(false)}
           />
-          <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
-            <div className={`flex items-center gap-4 p-6 border-b ${getStyles()}`}>
+          <div className="paper-card relative rounded-[1.75rem] w-full max-w-md mx-4 overflow-hidden">
+            <div className={`flex items-center gap-4 p-6 border-b ${getHeaderStyles()}`}>
               {getIcon()}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">{modal.title}</h3>
+                <h3 className="font-display text-lg font-semibold text-stone-900">{modal.title}</h3>
               </div>
             </div>
-            <div className="p-6">
-              <p className="text-gray-600">{modal.message}</p>
+            <div className="p-6 bg-[#FFFDF9]">
+              <p className="text-sm leading-relaxed text-stone-600">{modal.message}</p>
             </div>
-            <div className="flex justify-end gap-3 px-6 py-4 bg-gray-50 border-t">
+            <div className="flex justify-end gap-3 px-6 py-4 bg-[#FAF7F1] border-t border-stone-900/10">
               {modal.type === 'confirm' && (
                 <button
                   onClick={() => closeModal(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 text-sm font-semibold text-stone-900 bg-white border border-stone-900/10 rounded-full hover:bg-white transition-colors"
                 >
                   {modal.cancelText}
                 </button>
               )}
               <button
                 onClick={() => closeModal(true)}
-                className={`px-4 py-2 text-sm font-medium rounded-lg ${getButtonStyles()}`}
+                className={`px-5 py-2 text-sm font-semibold rounded-full transition-colors ${getButtonStyles()}`}
               >
                 {modal.confirmText}
               </button>

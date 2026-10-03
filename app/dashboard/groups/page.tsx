@@ -64,21 +64,22 @@ export default function GroupsPage() {
         }
     }
 
-    if (loading) return <div className="p-8 text-center">Loading...</div>
+    if (loading) return <div className="paper-card rounded-[1.5rem] p-8 text-center text-sm text-stone-500">Loading groups...</div>
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="md:flex md:items-center md:justify-between mb-8">
+        <div className="space-y-8">
+            <div className="md:flex md:items-center md:justify-between">
                     <div className="min-w-0 flex-1">
-                        <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#C2410C]">Cohorts</p>
+                        <h2 className="mt-1 font-display text-3xl font-semibold tracking-tight text-stone-900">
                             Student Groups
                         </h2>
+                        <p className="mt-1 text-sm text-stone-500">Organize students for faster assignment and monitoring.</p>
                     </div>
                     <div className="mt-4 flex md:ml-4 md:mt-0">
                         <Link
                             href="/dashboard"
-                            className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                            className="inline-flex items-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-stone-700 shadow-sm ring-1 ring-inset ring-stone-900/10 hover:bg-stone-900/5 transition-colors"
                         >
                             Back to Dashboard
                         </Link>
@@ -86,20 +87,20 @@ export default function GroupsPage() {
                 </div>
 
                 {/* Create Group Form */}
-                <div className="bg-white shadow sm:rounded-lg p-6 mb-8">
-                    <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Create New Group</h3>
-                    <form onSubmit={handleCreateGroup} className="flex gap-4">
+                <div className="paper-card rounded-[1.75rem] p-6">
+                    <h3 className="font-display text-lg font-semibold text-stone-900 mb-4">Create New Group</h3>
+                    <form onSubmit={handleCreateGroup} className="flex flex-col sm:flex-row gap-3">
                         <input
                             type="text"
                             value={newGroupName}
                             onChange={(e) => setNewGroupName(e.target.value)}
                             placeholder="Group Name (e.g., Class 10A)"
-                            className="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                            className="block w-full rounded-xl border border-stone-900/10 bg-white py-2.5 px-3.5 text-stone-900 shadow-sm placeholder:text-stone-400 focus:border-[#C2410C] focus:outline-none focus:ring-2 focus:ring-[#C2410C]/25 sm:text-sm transition-all"
                         />
                         <button
                             type="submit"
                             disabled={creating || !newGroupName.trim()}
-                            className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+                            className="inline-flex shrink-0 items-center justify-center rounded-full bg-stone-900 px-4 py-2.5 text-sm font-semibold text-[#FFF7ED] shadow-[0_14px_28px_-14px_rgba(28,25,23,0.6)] hover:bg-[#C2410C] disabled:opacity-50 transition-colors"
                         >
                             <Plus className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
                             Create
@@ -111,32 +112,32 @@ export default function GroupsPage() {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {groups.map((group) => (
                         <Link key={group.id} href={`/dashboard/groups/${group.id}`} className="block">
-                            <div className="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+                            <div className="paper-card paper-card-hover relative flex items-center gap-3 rounded-[1.5rem] px-6 py-5">
                                 <div className="flex-shrink-0">
-                                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100">
-                                        <Users className="h-6 w-6 text-indigo-600" aria-hidden="true" />
+                                    <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#C2410C]/10">
+                                        <Users className="h-6 w-6 text-[#C2410C]" aria-hidden="true" />
                                     </span>
                                 </div>
                                 <div className="min-w-0 flex-1">
                                     <span className="absolute inset-0" aria-hidden="true" />
-                                    <p className="text-sm font-medium text-gray-900">{group.name}</p>
-                                    <p className="truncate text-sm text-gray-500">
+                                    <p className="font-display text-[15px] font-semibold text-stone-900">{group.name}</p>
+                                    <p className="truncate text-sm text-stone-500">
                                         {group._count.members} Students
                                     </p>
                                 </div>
                                 <div className="flex-shrink-0">
-                                    <ArrowRight className="h-5 w-5 text-gray-400" />
+                                    <ArrowRight className="h-5 w-5 text-stone-300" />
                                 </div>
                             </div>
                         </Link>
                     ))}
                     {groups.length === 0 && (
-                        <div className="col-span-full text-center py-12 text-gray-500">
-                            No groups created yet.
+                        <div className="paper-card col-span-full rounded-[1.5rem] border-dashed text-center py-12">
+                            <p className="font-display text-lg font-semibold text-stone-900">No groups yet</p>
+                            <p className="mt-1 text-sm text-stone-500">Create your first cohort to organize students.</p>
                         </div>
                     )}
                 </div>
-            </div>
         </div>
     )
 }

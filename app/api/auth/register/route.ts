@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { hash } from "bcryptjs"
-
-const MIN_PASSWORD_LENGTH = 8
+import { validatePassword } from "@/lib/validators/password"
 
 const registerRateLimit = new Map<string, { count: number; resetTime: number }>()
 const REGISTER_RATE_LIMIT = 5
@@ -29,25 +28,6 @@ function getClientIP(request: Request): string {
     const headers = request.headers
     const forwarded = headers.get("x-forwarded-for")
     return forwarded ? forwarded.split(",")[0].trim() : "unknown"
-}
-
-function validatePassword(password: string): string | null {
-    if (password.length < MIN_PASSWORD_LENGTH) {
-        return `Password must be at least ${MIN_PASSWORD_LENGTH} characters`
-    }
-    if (!/[A-Z]/.test(password)) {
-        return "Password must contain at least one uppercase letter"
-    }
-    if (!/[a-z]/.test(password)) {
-        return "Password must contain at least one lowercase letter"
-    }
-    if (!/\d/.test(password)) {
-        return "Password must contain at least one number"
-    }
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-        return "Password must contain at least one special character"
-    }
-    return null
 }
 
 export async function POST(req: Request) {

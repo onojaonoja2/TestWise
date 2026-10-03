@@ -70,7 +70,7 @@ export default function TestManagementButtons({ testId, published, archived, vis
     }
 
     if (loading) {
-        return <span className="text-gray-400 text-sm">Updating...</span>
+        return <span className="text-stone-400 text-sm">Updating...</span>
     }
 
     const copyLink = () => {
@@ -86,12 +86,12 @@ export default function TestManagementButtons({ testId, published, archived, vis
             {isEditable ? (
                 <Link
                     href={`/dashboard/test/${testId}/edit`}
-                    className="px-3 py-1.5 text-center rounded-md border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-indigo-300 font-medium transition-colors"
+                    className="px-3 py-1.5 text-center rounded-xl border border-stone-900/10 bg-white text-stone-700 hover:bg-stone-900/5 hover:border-[#C2410C]/30 font-medium transition-colors"
                 >
                     Edit
                 </Link>
             ) : (
-                <span className="px-3 py-1.5 text-center rounded-md border border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed" title="Cannot edit published test or test with submissions">
+                <span className="px-3 py-1.5 text-center rounded-xl border border-stone-900/5 bg-stone-900/[0.03] text-stone-400 cursor-not-allowed" title="Cannot edit published test or test with submissions">
                     Edit
                 </span>
             )}
@@ -99,7 +99,7 @@ export default function TestManagementButtons({ testId, published, archived, vis
             {!archived && (
                 <button
                     onClick={() => updateStatus({ published: !published })}
-                    className={`px-3 py-1.5 text-center rounded-md border font-medium transition-colors ${published ? 'border-yellow-200 bg-yellow-50 text-yellow-700 hover:bg-yellow-100' : 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100'}`}
+                    className={`px-3 py-1.5 text-center rounded-xl border font-medium transition-colors ${published ? 'border-amber-600/20 bg-amber-100 text-amber-900 hover:bg-amber-200/60' : 'border-emerald-700/20 bg-emerald-700/10 text-emerald-800 hover:bg-emerald-700/20'}`}
                 >
                     {published ? 'Unpublish' : 'Publish'}
                 </button>
@@ -107,7 +107,7 @@ export default function TestManagementButtons({ testId, published, archived, vis
 
             <button
                 onClick={() => updateStatus({ archived: !archived })}
-                className={`px-3 py-1.5 text-center rounded-md border font-medium transition-colors ${archived ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100' : 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100'}`}
+                className={`px-3 py-1.5 text-center rounded-xl border font-medium transition-colors ${archived ? 'border-stone-900/15 bg-stone-900 text-[#FFF7ED] hover:bg-[#C2410C]' : 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100'}`}
             >
                 {archived ? 'Restore' : 'Archive'}
             </button>
@@ -115,12 +115,12 @@ export default function TestManagementButtons({ testId, published, archived, vis
             {isEditable ? (
                 <button
                     onClick={deleteTest}
-                    className="px-3 py-1.5 text-center rounded-md border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 font-medium transition-colors"
+                    className="px-3 py-1.5 text-center rounded-xl border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 font-medium transition-colors"
                 >
                     Delete
                 </button>
             ) : (
-                <span className="px-3 py-1.5 text-center rounded-md border border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed" title="Cannot delete published test or test with submissions">
+                <span className="px-3 py-1.5 text-center rounded-xl border border-stone-900/5 bg-stone-900/[0.03] text-stone-400 cursor-not-allowed" title="Cannot delete published test or test with submissions">
                     Delete
                 </span>
             )}
@@ -128,7 +128,7 @@ export default function TestManagementButtons({ testId, published, archived, vis
             {visibility === 'PUBLIC' && (
                 <button
                     onClick={copyLink}
-                    className="px-3 py-1.5 text-center rounded-md border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-medium transition-colors"
+                    className="px-3 py-1.5 text-center rounded-xl border border-[#C2410C]/25 bg-[#C2410C]/10 text-[#9A3412] hover:bg-[#C2410C]/20 font-medium transition-colors"
                     title="Copy Public Link"
                 >
                     Copy Link

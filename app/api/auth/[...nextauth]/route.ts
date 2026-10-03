@@ -54,6 +54,7 @@ export const authOptions: NextAuthOptions = {
                         id: user.id,
                         email: user.email,
                         name: user.name,
+                        image: user.image,
                         role: user.role,
                         organizationId: user.organizationId,
                         isSubAdmin: user.isSubAdmin
@@ -83,12 +84,18 @@ export const authOptions: NextAuthOptions = {
         strategy: "jwt"
     },
     callbacks: {
-        async jwt({ token, user }) {
+        async jwt({ token, user, trigger, session }) {
             if (user) {
                 token.role = user.role
                 token.id = user.id
                 token.organizationId = user.organizationId
                 token.isSubAdmin = user.isSubAdmin
+                token.picture = user.image ?? token.picture
+            }
+            // Allow client-side session.update() to refresh name/image
+            if (trigger === "update" && session?.user) {
+                if (typeof session.user.name !== "undefined") token.name = session.user.name
+                if (typeof session.user.image !== "undefined") token.picture = session.user.image
             }
             return token
         },
@@ -98,6 +105,7 @@ export const authOptions: NextAuthOptions = {
                 session.user.id = token.id as string
                 session.user.organizationId = token.organizationId
                 session.user.isSubAdmin = token.isSubAdmin
+                session.user.image = (token.picture as string | null | undefined) ?? session.user.image
             }
             return session
         }

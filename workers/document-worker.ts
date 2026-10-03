@@ -1,7 +1,11 @@
 import { createHash, randomFillSync } from "crypto"
 
-if (typeof globalThis.DOMMatrix === "undefined") {
-  globalThis.DOMMatrix = class DOMMatrix {
+// Minimal DOM/polyfill shims for pdfjs in Node.
+// Typed via a record cast so `tsc -p workers/tsconfig.json` stays clean.
+const g = globalThis as unknown as Record<string, any>
+
+if (typeof g.DOMMatrix === "undefined") {
+  g.DOMMatrix = class DOMMatrix {
     a: number = 1; b: number = 0; c: number = 0; d: number = 1;
     e: number = 0; f: number = 0;
     constructor(init?: string | number[]) {
@@ -12,15 +16,15 @@ if (typeof globalThis.DOMMatrix === "undefined") {
   }
 }
 
-if (!globalThis.crypto) {
-  globalThis.crypto = {
+if (!g.crypto) {
+  g.crypto = {
     subtle: {} as any,
     getRandomValues: (arr: Uint8Array) => randomFillSync(arr),
   } as any
 }
 
-if (!globalThis.Hash) {
-  globalThis.Hash = class Hash {
+if (!g.Hash) {
+  g.Hash = class Hash {
     private hash: any
     constructor(algorithm: string) {
       this.hash = createHash(algorithm)
@@ -39,13 +43,24 @@ if (!globalThis.Hash) {
 }
 
 import { Worker } from "bullmq"
-import IORedis from "ioredis"
 
-const connection = new IORedis(process.env.REDIS_URL || "redis://localhost:6379", {
-  maxRetriesPerRequest: null,
-  enableReadyCheck: false,
-  lazyConnect: true,
-})
+// Fail fast with an actionable message instead of cryptic client errors.
+const requiredEnv = ["REDIS_URL", "DATABASE_URL", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "S3_BUCKET_NAME"] as const
+const missing = requiredEnv.filter((key) => !process.env[key])
+if (missing.length > 0) {
+  console.error(`[Worker] Missing required environment variables: ${missing.join(", ")}`)
+  process.exit(1)
+}
+
+// Railway sizing lever: lower this on small plans instead of touching the heap flag.
+// Defaults to 4 to preserve existing behavior.
+const concurrency = Math.max(1, parseInt(process.env.WORKER_CONCURRENCY || "4", 10) || 4)
+
+async function createConnection() {
+  // Shared factory (TLS-aware for `rediss://`, BullMQ-safe flags).
+  const { createRedisConnection } = await import("@/lib/queue/connection")
+  return createRedisConnection()
+}
 
 let prisma: any
 let downloadFromS3: any
@@ -110,59 +125,82 @@ async function extractTextStreaming(buffer: Buffer, mimeType: string): Promise<s
   throw new Error(`Unsupported file type: ${mimeType}`)
 }
 
-const worker = new Worker(
-  "document-processing",
-  async (job) => {
-    const { documentId, userId, filename, mimeType } = job.data
-    const { prisma: p, downloadFromS3: ds3, buildS3Key: bsk } = await initModules()
-    prisma = p
-    downloadFromS3 = ds3
-    buildS3Key = bsk
+async function main() {
+  const connection = await createConnection()
 
-    console.log(`[Worker] Processing document: ${documentId}`)
+  const worker = new Worker(
+    "document-processing",
+    async (job) => {
+      const { documentId, userId, filename, mimeType } = job.data
+      const { prisma: p, downloadFromS3: ds3, buildS3Key: bsk } = await initModules()
+      prisma = p
+      downloadFromS3 = ds3
+      buildS3Key = bsk
 
+      console.log(`[Worker] Processing document: ${documentId}`)
+
+      try {
+        await prisma.document.update({
+          where: { id: documentId },
+          data: { status: "PROCESSING" },
+        })
+
+        const s3Key = buildS3Key(userId, filename)
+        let fileBuffer = await downloadFromS3(s3Key)
+
+        const text = await extractTextStreaming(fileBuffer, mimeType)
+        fileBuffer = null as any
+
+        await prisma.document.update({
+          where: { id: documentId },
+          data: { 
+            content: text,
+            status: "READY" 
+          },
+        })
+
+        console.log(`[Worker] Document ${documentId} processed successfully (${text.length} chars)`)
+        return { success: true }
+      } catch (error) {
+        console.error(`[Worker] Error processing document ${documentId}:`, error)
+
+        await prisma.document.update({
+          where: { id: documentId },
+          data: { status: "FAILED" },
+        }).catch(() => {})
+
+        throw error
+      }
+    },
+    { connection, concurrency }
+  )
+
+  worker.on("completed", (job) => {
+    console.log(`[Worker] Job ${job.id} completed`)
+  })
+
+  worker.on("failed", (job, err) => {
+    console.error(`[Worker] Job ${job?.id} failed:`, err.message)
+  })
+
+  // Railway sends SIGTERM on redeploy — drain gracefully instead of dropping jobs.
+  const shutdown = async (signal: string) => {
+    console.log(`[Worker] Received ${signal}, closing...`)
     try {
-      await prisma.document.update({
-        where: { id: documentId },
-        data: { status: "PROCESSING" },
-      })
-
-      const s3Key = buildS3Key(userId, filename)
-      let fileBuffer = await downloadFromS3(s3Key)
-
-      const text = await extractTextStreaming(fileBuffer, mimeType)
-      fileBuffer = null as any
-
-      await prisma.document.update({
-        where: { id: documentId },
-        data: { 
-          content: text,
-          status: "READY" 
-        },
-      })
-
-      console.log(`[Worker] Document ${documentId} processed successfully (${text.length} chars)`)
-      return { success: true }
-    } catch (error) {
-      console.error(`[Worker] Error processing document ${documentId}:`, error)
-
-      await prisma.document.update({
-        where: { id: documentId },
-        data: { status: "FAILED" },
-      }).catch(() => {})
-
-      throw error
+      await worker.close()
+    } catch (err) {
+      console.error("[Worker] Error during shutdown:", err)
+    } finally {
+      process.exit(0)
     }
-  },
-  { connection, concurrency: 4 }
-)
+  }
+  process.on("SIGTERM", () => shutdown("SIGTERM"))
+  process.on("SIGINT", () => shutdown("SIGINT"))
 
-worker.on("completed", (job) => {
-  console.log(`[Worker] Job ${job.id} completed`)
+  console.log(`[Worker] Document processing worker started (concurrency=${concurrency})`)
+}
+
+main().catch((err) => {
+  console.error("[Worker] Fatal startup error:", err)
+  process.exit(1)
 })
-
-worker.on("failed", (job, err) => {
-  console.error(`[Worker] Job ${job?.id} failed:`, err.message)
-})
-
-console.log("[Worker] Document processing worker started")
