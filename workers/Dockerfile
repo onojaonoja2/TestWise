@@ -2,10 +2,12 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-COPY prisma ./prisma/
-COPY lib ./lib/
-COPY workers ./workers/
+# Single COPY: selective per-path COPYs proved brittle against the
+# builder's snapshot (missing workers/, types/). .dockerignore already
+# excludes node_modules, .next, .git, .env, logs, etc.
+COPY . ./
+
+RUN ls -la /app && echo "--- worker deps ---" && ls /app/workers /app/lib /app/prisma
 
 RUN npm install
 
