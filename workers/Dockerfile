@@ -6,7 +6,6 @@ COPY package.json package-lock.json ./
 COPY prisma ./prisma/
 COPY lib ./lib/
 COPY workers ./workers/
-COPY types ./types/
 
 RUN npm install
 
