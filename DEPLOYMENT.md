@@ -76,8 +76,12 @@ schema needs it (`DocumentChunk.embedding` is `vector(1536)`).
 
 1. **+ New** → **GitHub Repo** → select the TestWise repo.
 2. Service **Settings** → **Build**: set **Dockerfile Path** to
-   `workers/Dockerfile` (auto-detection only finds a root Dockerfile,
-   and ours lives under `workers/`).
+   `Dockerfile.worker` (repo root — the build context must be the repo
+   root so `package.json`, `prisma/`, `lib/`, and `workers/` are all
+   visible. Pointing at the old `workers/Dockerfile` shrank the context
+   to `workers/` alone, which fails with `"/workers": not found` /
+   `"/lib": not found` checksum errors. That file has been deleted so
+   nothing can point at it again).
 3. **Settings** → **Deploy**:
    - Start Command: `npm run worker` (matches the Dockerfile `CMD`).
    - Restart Policy: `On Failure` (default is fine).
@@ -200,6 +204,11 @@ duplicate rows.
 - **Missing env at boot** — the worker fails fast listing the absent
   keys (`REDIS_URL`, `DATABASE_URL`, AWS/S3 vars). Add them in the
   Railway service Variables tab and redeploy.
+- **`failed to calculate checksum ... "/workers": not found` (or
+  `"/lib"`, `"/types"`) during the image build** — the build context is
+  not the repo root (this happens if Dockerfile Path points inside
+  `workers/`). Fix: point Dockerfile Path at the root-level
+  `Dockerfile.worker` and redeploy.
 - **Aiven firewall** — the dump runs from your machine, so no Railway
   IP allow-listing is needed; only the worker needs DB reachability,
   which private networking handles.
